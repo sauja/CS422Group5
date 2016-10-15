@@ -1,21 +1,18 @@
 package com.cs442.group5.feedback;
 
-
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
-
 import android.os.Bundle;
 
-
-/**
- * A login screen that offers login via email/password.
- */
-public class LoginActivity extends AppCompatActivity
+public class SplashScreen extends AppCompatActivity
 {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_login);
+		Intent intent=new Intent(this,LoginActivity.class);
+		startActivity(intent);
+
 	}
 }
