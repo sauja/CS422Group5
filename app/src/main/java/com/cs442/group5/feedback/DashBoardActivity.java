@@ -20,12 +20,16 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import com.cs442.group5.feedback.database.User.User;
+
 import java.util.ArrayList;
 
 public class DashBoardActivity extends AppCompatActivity
 		implements NavigationView.OnNavigationItemSelectedListener
 {
 	GridView gridView;
+	TextView textView_userName;
+	TextView textView_email;
 	ArrayList<String> itemList=new ArrayList<>();
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -34,6 +38,7 @@ public class DashBoardActivity extends AppCompatActivity
 		setContentView(R.layout.activity_dash_board);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
+
 
 		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 		fab.setOnClickListener(new View.OnClickListener()
@@ -54,7 +59,18 @@ public class DashBoardActivity extends AppCompatActivity
 
 		NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 		navigationView.setNavigationItemSelectedListener(this);
-
+		View headerView = navigationView.getHeaderView(0);
+		textView_userName=(TextView) headerView.findViewById(R.id.textView_userName);
+		textView_email=(TextView) headerView.findViewById(R.id.textView_email);
+		if(getIntent().getExtras().containsKey("user"))
+		{
+			User user=(User)getIntent().getExtras().getSerializable("user");
+			if(user!=null)
+			{
+				textView_userName.setText(user.getUserName());
+				textView_email.setText(user.getEmail());
+			}
+		}
 
 		GridView gridView=(GridView) findViewById(R.id.gridView_dasboard_list);
 		gridView.setClickable(true);
@@ -150,17 +166,31 @@ public class DashBoardActivity extends AppCompatActivity
 		// Handle navigation view item clicks here.
 		int id = item.getItemId();
 		Intent intent;
-		if (id == R.id.aboutUs)
+		switch (id)
 		{
-
-		} else if (id == R.id.dashboard)
-		{
-
-		} else if (id == R.id.new_form)
-		{
-			intent=new Intent(this,NewFormActivity.class);
-			startActivity(intent);
+			case R.id.dashboard: break;
+			case R.id.new_form:
+				intent=new Intent(this,NewFormActivity.class);
+				startActivity(intent);
+				break;
+			case R.id.logout:
+				intent=new Intent(this,LoginActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(intent);
+				finish();
+				break;
+			case R.id.TandC:
+				intent=new Intent(this,TermsNConditions.class);
+				startActivity(intent);
+				break;
+			case R.id.aboutUs:
+				intent=new Intent(this,AboutUs.class);
+				startActivity(intent);
+				break;
 		}
+
+
+
 
 		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 		drawer.closeDrawer(GravityCompat.START);
