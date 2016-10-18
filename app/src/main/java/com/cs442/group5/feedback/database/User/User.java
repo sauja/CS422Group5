@@ -10,11 +10,11 @@ public class User implements Serializable
 {
 	private String userName;
 	private String password;
-	private String fname="";
-	private String lname="";
-	private String email="";
-	private String address="";
-	private String contactNo="";
+	private String fname = "";
+	private String lname = "";
+	private String email = "";
+	private String address = "";
+	private String contactNo = "";
 
 
 	public String getFname()

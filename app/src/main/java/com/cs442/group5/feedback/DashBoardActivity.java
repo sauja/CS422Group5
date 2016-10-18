@@ -3,18 +3,15 @@ package com.cs442.group5.feedback;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
@@ -30,7 +27,8 @@ public class DashBoardActivity extends AppCompatActivity
 	GridView gridView;
 	TextView textView_userName;
 	TextView textView_email;
-	ArrayList<String> itemList=new ArrayList<>();
+	ArrayList<String> itemList = new ArrayList<>();
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -40,7 +38,7 @@ public class DashBoardActivity extends AppCompatActivity
 		setSupportActionBar(toolbar);
 
 
-		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+		/*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 		fab.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -49,7 +47,7 @@ public class DashBoardActivity extends AppCompatActivity
 				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 						.setAction("Action", null).show();
 			}
-		});
+		});*/
 
 		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -60,26 +58,25 @@ public class DashBoardActivity extends AppCompatActivity
 		NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 		navigationView.setNavigationItemSelectedListener(this);
 		View headerView = navigationView.getHeaderView(0);
-		textView_userName=(TextView) headerView.findViewById(R.id.textView_userName);
-		textView_email=(TextView) headerView.findViewById(R.id.textView_email);
-		if(getIntent().getExtras().containsKey("user"))
+		textView_userName = (TextView) headerView.findViewById(R.id.textView_userName);
+		textView_email = (TextView) headerView.findViewById(R.id.textView_email);
+		if (getIntent().getExtras().containsKey("user"))
 		{
-			User user=(User)getIntent().getExtras().getSerializable("user");
-			if(user!=null)
+			User user = (User) getIntent().getExtras().getSerializable("user");
+			if (user != null)
 			{
-				textView_userName.setText(user.getUserName());
+				textView_userName.setText(user.getFname() + " " + user.getLname());
 				textView_email.setText(user.getEmail());
 			}
 		}
 
-		GridView gridView=(GridView) findViewById(R.id.gridView_dasboard_list);
+		GridView gridView = (GridView) findViewById(R.id.gridView_dasboard_list);
 		gridView.setClickable(true);
-		for(int i=1;i<26;i++)
-			itemList.add("Form "+i);
-		MenuItemListAdapter arrayAdapter=new MenuItemListAdapter(this,itemList);
+		for (int i = 1; i < 26; i++)
+			itemList.add("Form " + i);
+		MenuItemListAdapter arrayAdapter = new MenuItemListAdapter(this, itemList);
 		gridView.setAdapter(arrayAdapter);
 		arrayAdapter.notifyDataSetChanged();
-
 
 
 	}
@@ -88,35 +85,45 @@ public class DashBoardActivity extends AppCompatActivity
 	{
 		Context context;
 		private final ArrayList<String> menuList;
+
 		public MenuItemListAdapter(Context context, ArrayList<String> items)
 		{
 			super(context, 0, items);
 			this.context = context;
-			this.menuList=items;
+			this.menuList = items;
 		}
+
 		@Override
-		public int getCount() {
+		public int getCount()
+		{
 			return menuList.size();
 		}
+
 		@Override
-		public String getItem(int pos) {
+		public String getItem(int pos)
+		{
 			return menuList.get(pos);
 		}
+
 		@Override
-		public long getItemId(int position) {
+		public long getItemId(int position)
+		{
 			return position;
 		}
+
 		@Override
-		public View getView(final int position, View convertView, ViewGroup parent) {
+		public View getView(final int position, View convertView, ViewGroup parent)
+		{
 			View v = convertView;
-			if (v == null) {
+			if (v == null)
+			{
 				LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				v = vi.inflate (R.layout.form_list_item, null);
+				v = vi.inflate(R.layout.form_list_item, null);
 			}
-			String item=getItem (position);
+			String item = getItem(position);
 			View itemView = v;
-			TextView textView_id = (TextView) v.findViewById (R.id.textView_formName);
-			textView_id.setText (item);
+			TextView textView_id = (TextView) v.findViewById(R.id.textView_formName);
+			textView_id.setText(item);
 			return itemView;
 		}
 	}
@@ -168,28 +175,29 @@ public class DashBoardActivity extends AppCompatActivity
 		Intent intent;
 		switch (id)
 		{
-			case R.id.dashboard: break;
+			case R.id.dashboard:
+				break;
 			case R.id.new_form:
-				intent=new Intent(this,NewFormActivity.class);
+				intent = new Intent(this, NewFormActivity.class);
 				startActivity(intent);
 				break;
 			case R.id.logout:
-				intent=new Intent(this,LoginActivity.class);
+				intent = new Intent(this, LoginActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);
 				finish();
 				break;
 			case R.id.TandC:
-				intent=new Intent(this,TermsNConditions.class);
+				intent = new Intent(this, TermsNConditions.class);
+				intent.putExtra("webviewName", "TermsNConditions");
 				startActivity(intent);
 				break;
 			case R.id.aboutUs:
-				intent=new Intent(this,AboutUs.class);
+				intent = new Intent(this, TermsNConditions.class);
+				intent.putExtra("webviewName", "AboutUs");
 				startActivity(intent);
 				break;
 		}
-
-
 
 
 		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

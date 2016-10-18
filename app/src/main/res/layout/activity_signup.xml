@@ -22,7 +22,7 @@
             app:titleTextColor="@android:color/background_light"/>
 
     </android.support.design.widget.AppBarLayout>
-    <include layout="@layout/content_signup"
-        />
+
+    <include layout="@layout/content_signup"/>
 
 </android.support.design.widget.CoordinatorLayout>
