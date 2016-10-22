@@ -15,11 +15,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.cs442.group5.feedback.database.User.User;
 
 import java.util.ArrayList;
+
+import io.fabric.sdk.android.Fabric;
 
 public class DashBoardActivity extends AppCompatActivity
 		implements NavigationView.OnNavigationItemSelectedListener
@@ -33,6 +37,7 @@ public class DashBoardActivity extends AppCompatActivity
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		Fabric.with(this, new Crashlytics());
 		setContentView(R.layout.activity_dash_board);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
@@ -60,9 +65,22 @@ public class DashBoardActivity extends AppCompatActivity
 		View headerView = navigationView.getHeaderView(0);
 		textView_userName = (TextView) headerView.findViewById(R.id.textView_userName);
 		textView_email = (TextView) headerView.findViewById(R.id.textView_email);
+		ImageView imageView=(ImageView)headerView.findViewById(R.id.imageView_profile);
+		final Context context=this;
+		imageView.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View view)
+			{
+				Intent intent = new Intent(context, MyProfileActivity.class);
+				//intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(intent);
+				//finish();
+			}
+		});
 		if (getIntent().getExtras().containsKey("user"))
 		{
-			User user = (User) getIntent().getExtras().getSerializable("user");
+			User user = User.getInstance();
 			if (user != null)
 			{
 				textView_userName.setText(user.getFname() + " " + user.getLname());
@@ -175,6 +193,12 @@ public class DashBoardActivity extends AppCompatActivity
 		Intent intent;
 		switch (id)
 		{
+			case R.id.myprofile:
+				intent = new Intent(this, MyProfileActivity.class);
+				//intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(intent);
+				//finish();
+				break;
 			case R.id.dashboard:
 				break;
 			case R.id.new_form:

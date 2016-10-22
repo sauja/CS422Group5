@@ -8,34 +8,23 @@ import java.io.Serializable;
 
 public class User implements Serializable
 {
+	static User user;
 	private String userName;
 	private String password;
-	private String fname = "";
-	private String lname = "";
 	private String email = "";
 	private String address = "";
 	private String contactNo = "";
 
+	private User(){
 
-	public String getFname()
-	{
-		return fname;
+	}
+	public static User getInstance(){
+		if(user == null){
+			user = new User();
+		}
+		return user;
 	}
 
-	public void setFname(String fname)
-	{
-		this.fname = fname;
-	}
-
-	public String getLname()
-	{
-		return lname;
-	}
-
-	public void setLname(String lname)
-	{
-		this.lname = lname;
-	}
 
 	public String getEmail()
 	{
@@ -93,12 +82,11 @@ public class User implements Serializable
 		this.password = password;
 	}
 
-	public User(String userName, String password, String fname, String lname, String email, String address, String contactNo)
+	public User(String userName, String password,  String email, String address, String contactNo)
 	{
 		this.userName = userName;
 		this.password = password;
-		this.fname = fname;
-		this.lname = lname;
+
 		this.email = email;
 		this.address = address;
 		this.contactNo = contactNo;
