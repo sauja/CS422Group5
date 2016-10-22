@@ -34,7 +34,13 @@ public class CircleFAB extends ConstraintLayout
 		this.context = context;
 		LayoutInflater inflater = LayoutInflater.from(context);
 		inflater.inflate(R.layout.circle_fab, this);
-
+		fab_main = (FloatingActionButton) findViewById(R.id.fab_main);
+		fab_top = (FloatingActionButton) findViewById(R.id.fab_top);
+		fab_middle = (FloatingActionButton) findViewById(R.id.fab_middle);
+		fab_bottom = (FloatingActionButton) findViewById(R.id.fab_bottom);
+		fab_bottom.setVisibility(INVISIBLE);
+		fab_middle.setVisibility(INVISIBLE);
+		fab_top.setVisibility(INVISIBLE);
 		loadViews();
 	}
 
@@ -46,10 +52,8 @@ public class CircleFAB extends ConstraintLayout
 
 	private void loadViews()
 	{
-		fab_main = (FloatingActionButton) findViewById(R.id.fab_main);
-		fab_top = (FloatingActionButton) findViewById(R.id.fab_top);
-		fab_middle = (FloatingActionButton) findViewById(R.id.fab_middle);
-		fab_bottom = (FloatingActionButton) findViewById(R.id.fab_bottom);
+
+
 		fab_main.setOnClickListener(new OnClickListener()
 		{
 			@Override
@@ -71,6 +75,7 @@ public class CircleFAB extends ConstraintLayout
 		fab_middle_open = AnimationUtils.loadAnimation(context, R.anim.fab_middle_open);
 		fab_middle_close = AnimationUtils.loadAnimation(context, R.anim.fab_middle_close);
 		animateFAB();
+
 	}
 
 	public void animateFAB()
@@ -100,6 +105,9 @@ public class CircleFAB extends ConstraintLayout
 			fab_top.setClickable(true);
 			isFABOpen = true;
 
-		}
+		}fab_bottom.setVisibility(VISIBLE);
+		fab_middle.setVisibility(VISIBLE);
+		fab_top.setVisibility(VISIBLE);
+
 	}
 }

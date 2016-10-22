@@ -96,4 +96,12 @@
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_terms_nconditions">TermsNConditions</string>
 
+    <string-array name="question_types">
+        <item>Single Line</item>
+        <item>CheckBox</item>
+        <item>Radio Button</item>
+        <item>Drop Down</item>
+        <item>Rating</item>
+    </string-array>
+
 </resources>
