@@ -38,9 +38,11 @@
         </activity>
         <activity android:name=".MyProfileActivity">
         </activity>
+        <activity android:name=".StoreActivity">
+        </activity>
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="1276202d8f4a486c1888c7199f6f9c3010c561a5" />
+            android:value="c56305f7af11ae5fc68dad35bcd9771606689805" />
     </application>
 
 </manifest>
