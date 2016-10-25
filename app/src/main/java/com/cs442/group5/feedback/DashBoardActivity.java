@@ -9,17 +9,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
-import com.cs442.group5.feedback.database.User.User;
 
 import java.util.ArrayList;
 
@@ -78,28 +74,41 @@ public class DashBoardActivity extends AppCompatActivity
 				//finish();
 			}
 		});
-		if (getIntent().getExtras().containsKey("user"))
+		ImageView imageView4=(ImageView) findViewById(R.id.imageView4);
+		imageView4.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View view)
+			{
+				Intent intent=new Intent(context,StoreActivity.class);
+				startActivity(intent);
+			}
+		});
+
+
+
+		/*if (getIntent().getExtras().containsKey("user"))
 		{
 			User user = User.getInstance();
 			if (user != null)
 			{
-				textView_userName.setText(user.getFname() + " " + user.getLname());
+				textView_userName.setText(user.getUserName());
 				textView_email.setText(user.getEmail());
 			}
-		}
+		}*/
 
-		GridView gridView = (GridView) findViewById(R.id.gridView_dasboard_list);
+		/*GridView gridView = (GridView) findViewById(R.id.gridView_dasboard_list);
 		gridView.setClickable(true);
 		for (int i = 1; i < 26; i++)
 			itemList.add("Form " + i);
 		MenuItemListAdapter arrayAdapter = new MenuItemListAdapter(this, itemList);
 		gridView.setAdapter(arrayAdapter);
 		arrayAdapter.notifyDataSetChanged();
-
+*/
 
 	}
 
-	private class MenuItemListAdapter extends ArrayAdapter<String>
+	/*private class MenuItemListAdapter extends ArrayAdapter<String>
 	{
 		Context context;
 		private final ArrayList<String> menuList;
@@ -144,7 +153,7 @@ public class DashBoardActivity extends AppCompatActivity
 			textView_id.setText(item);
 			return itemView;
 		}
-	}
+	}*/
 
 	@Override
 	public void onBackPressed()

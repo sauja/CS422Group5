@@ -11,13 +11,27 @@
             android:icon="@drawable/shape_square_plus"
             android:title="New Form"/>
         <item
+            android:id="@+id/new_store"
+            android:icon="@drawable/domain"
+            android:title="New Store"/>
+        <item
             android:id="@+id/myprofile"
             android:icon="@drawable/account_outline"
             android:title="My Profile"/>
         <item
+            android:id="@+id/mychats"
+            android:icon="@android:drawable/stat_notify_chat"
+            android:title="My Chats"/>
+        <item
+            android:id="@+id/mytickets"
+            android:icon="@android:drawable/stat_notify_error"
+            android:title="My Tickets"/>
+        <item
             android:id="@+id/logout"
             android:icon="@drawable/logout_variant"
             android:title="Log Out"/>
+        </group>
+    <group android:checkableBehavior="single">
         <item
             android:id="@+id/TandC"
             android:icon="@drawable/information_outline"
