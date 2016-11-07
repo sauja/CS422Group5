@@ -64,6 +64,30 @@ public class StoreService {
 		return feeds;
 
 	}
+	@POST
+	@Path("/getMyStores")
+	@Consumes("application/x-www-form-urlencoded")
+	@Produces("application/json")
+	public String getMyStores( @FormParam("ownerid") long ownerid ) {
+		String feeds  = null;
+		try 
+		{
+System.out.println("getMyStores");
+			ArrayList<Store> feedData = null;
+			StoreManager projectManager= new StoreManager();
+			feedData = projectManager.getMyStores(ownerid);
+			//StringBuffer sb = new StringBuffer();
+			Gson gson = new Gson();
+			System.out.println(gson.toJson(feedData));
+			feeds = gson.toJson(feedData);
+
+		} catch (Exception e)
+		{
+			System.out.println("error "+e);
+		}
+		return feeds;
+
+	}
 
 	@POST
 	@Path("/addStore")

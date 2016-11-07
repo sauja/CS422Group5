@@ -74,7 +74,7 @@ public class DashBoardActivity extends AppCompatActivity
 				//finish();
 			}
 		});
-		ImageView imageView4=(ImageView) findViewById(R.id.imageView4);
+		ImageView imageView4=(ImageView) findViewById(R.id.imageView_img);
 		imageView4.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -214,8 +214,8 @@ public class DashBoardActivity extends AppCompatActivity
 				intent = new Intent(this, NewFormActivity.class);
 				startActivity(intent);
 				break;
-			case R.id.new_store:
-				intent = new Intent(this, NewStoreActivity.class);
+			case R.id.my_stores:
+				intent = new Intent(this, MyStoreActivity.class);
 				startActivity(intent);
 				break;
 			case R.id.logout:

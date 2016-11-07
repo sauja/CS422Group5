@@ -11,9 +11,9 @@
             android:icon="@drawable/shape_square_plus"
             android:title="New Form"/>
         <item
-            android:id="@+id/new_store"
+            android:id="@+id/my_stores"
             android:icon="@drawable/domain"
-            android:title="New Store"/>
+            android:title="My Store"/>
         <item
             android:id="@+id/myprofile"
             android:icon="@drawable/account_outline"

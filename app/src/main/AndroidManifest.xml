@@ -19,11 +19,6 @@
             android:name=".SplashScreen"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/SplashTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
 
         </activity>
         <activity android:name=".LoginActivity"/>
@@ -39,7 +34,6 @@
             android:name=".NewStoreActivity"
             android:label="New Store"
             android:theme="@style/AppTheme">
-
         </activity>
         <activity
             android:name=".TermsNConditions"
@@ -55,7 +49,6 @@
             android:name="io.fabric.ApiKey"
             android:value="c56305f7af11ae5fc68dad35bcd9771606689805"/>
 
-
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -68,7 +61,16 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key"/>
 
+        <activity
+            android:name=".MyStoreActivity"
+            android:label="@string/title_activity_my_store"
+            android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
 
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

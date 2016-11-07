@@ -38,6 +38,7 @@ public class NewStoreActivity extends FragmentActivity implements OnMapReadyCall
 	LocationManager locationManager;
 	private GoogleMap mMap;
 	RequestQueue queue;
+	String ownerid="";
 	private Context context = this;
 	private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
@@ -61,6 +62,13 @@ public class NewStoreActivity extends FragmentActivity implements OnMapReadyCall
 				.findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
 		final NestedScrollView scrollView = (NestedScrollView) findViewById(R.id.content_new_store2);
+		editText_name = (EditText) findViewById(R.id.editText_name);
+		editText_address = (EditText) findViewById(R.id.editText_address);
+		editText_Location = (EditText) findViewById(R.id.editText_Location);
+		editText_zipcode = (EditText) findViewById(R.id.editText_zipcode);
+		editText_phone_no = (EditText) findViewById(R.id.editText_phone_no);
+		editText_emailid = (EditText) findViewById(R.id.editText_emailid);
+		editText_website = (EditText) findViewById(R.id.editText_website);
 		Criteria criteria = new Criteria();
 
 		// Getting the name of the best provider
@@ -77,18 +85,20 @@ public class NewStoreActivity extends FragmentActivity implements OnMapReadyCall
 			@Override
 			public void onClick(View view) {
 				if(validateFields())
-					addStore();
+				{
+					if(getIntent().getExtras().containsKey("mode"))
+					{
+						if(getIntent().getExtras().get("mode").equals("EDIT"))
+						{}
+					}
+					else
+						addStore();
+				}
 				else
 					Toast.makeText(context, "Please enter all fields", Toast.LENGTH_SHORT).show();
 			}
 		});
-		editText_name = (EditText) findViewById(R.id.editText_name);
-		editText_address = (EditText) findViewById(R.id.editText_address);
-		editText_Location = (EditText) findViewById(R.id.editText_Location);
-		editText_zipcode = (EditText) findViewById(R.id.editText_zipcode);
-		editText_phone_no = (EditText) findViewById(R.id.editText_phone_no);
-		editText_emailid = (EditText) findViewById(R.id.editText_emailid);
-		editText_website = (EditText) findViewById(R.id.editText_website);
+
 
 
 	}
@@ -141,16 +151,9 @@ public class NewStoreActivity extends FragmentActivity implements OnMapReadyCall
 			}
 		});
 		if (location != null) {
-			// Getting latitude of the current location
-			double latitude = location.getLatitude();
-
-			// Getting longitude of the current location
-			double longitude = location.getLongitude();
-
-			// Creating a LatLng object for the current location
-
-
+			LatLng latLng=new LatLng(location.getLatitude(),location.getLatitude());
 			googleMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(),location.getLatitude())).title("Start"));
+			mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLatitude()), mMap.getCameraPosition().zoom));
 		}
 	}
 
@@ -161,15 +164,14 @@ public class NewStoreActivity extends FragmentActivity implements OnMapReadyCall
 
 	public void addStore()
 	{
-//final String url=context.getString(R.string.server_string)+"/store/addStore";
-		final String url="http://192.168.1.110:8080/feedback_server/REST/store/addStore";
+		final String url=context.getString(R.string.server_url)+"/store/addStore";
 		Log.e(TAG, "addStore: " );
 		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>(){
 			@Override
 			public void onResponse(String response) {
 				Log.e(TAG, "onResponse: " );
 				if(response!=null&&response.length()>0)
-					Toast.makeText(context, "Store added successfully "+response, Toast.LENGTH_LONG).show();
+					Toast.makeText(context, "Store added successfully", Toast.LENGTH_LONG).show();
 			}
 		},new Response.ErrorListener() {
 			@Override
@@ -192,7 +194,7 @@ public class NewStoreActivity extends FragmentActivity implements OnMapReadyCall
 				parameters.put("website", editText_website.getText().toString());
 				parameters.put("gpsLat", String.valueOf(gps.latitude));
 				parameters.put("gpsLng", String.valueOf(gps.longitude));
-				parameters.put("ownerid", "1");
+				parameters.put("ownerid", ownerid);
 				return parameters;
 			}
 		};

@@ -97,6 +97,37 @@ public class StoreDAO
 			return "false";
 		}
 	}
+	public Store getMyStores(Connection connection,long ownerid) throws Exception
+	{
+		Store feedData =null;
+		try
+		{
+			PreparedStatement ps = (connection).prepareStatement("SELECT `id`,`name`,`address`,`location`,`zipcode`,`phone_no`,`emailid`,`website`,`gpsLat`,`gpsLng`,`ownerid` FROM `store` where ownerid="+ownerid+" ORDER BY id DESC");
+			ResultSet rs = ps.executeQuery();
+			while(rs.next())
+			{
+				Store storeObject = new Store();
+				storeObject.setId(rs.getLong("id"));
+				storeObject.setName(rs.getString("name"));
+				storeObject.setAddress(rs.getString("address"));
+				storeObject.setLocation(rs.getString("location"));
+				storeObject.setZipcode(rs.getString("zipcode"));
+				storeObject.setPhone_no(rs.getString("phone_no"));
+				storeObject.setEmailid(rs.getString("emailid"));
+				storeObject.setWebsite(rs.getString("website"));
+				storeObject.setGpsLat(rs.getString("gpsLat"));
+				storeObject.setGpsLng(rs.getString("gpsLng"));
+				storeObject.setOwnerID(rs.getString("ownerid"));
+				if(storeObject.getName()!=null)
+					feedData=storeObject;
+			}
+			return feedData;
+		}
+		catch(Exception e)
+		{
+			throw e;
+		}
+	}
 
 
 }
