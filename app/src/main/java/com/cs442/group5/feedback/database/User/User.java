@@ -10,6 +10,16 @@ public class User implements Serializable
 {
 	static User user;
 
+	private String userid;
+
+	public String getUserid() {
+		return userid;
+	}
+
+	public void setUserid(String userid) {
+		this.userid = userid;
+	}
+
 	private String userName;
 	private String password;
 	private String email = "";

@@ -33,7 +33,7 @@ public class SignUpActivity extends AppCompatActivity
 		setSupportActionBar(toolbar);
 		editText_fname = (EditText) findViewById(R.id.editText_fname);
 		editText_lname = (EditText) findViewById(R.id.editText_lname);
-		editText_email = (EditText) findViewById(R.id.editText_email);
+		editText_email = (EditText) findViewById(R.id.editText_emailid);
 		editText_userName = (EditText) findViewById(R.id.editText_userName);
 		editText_password = (EditText) findViewById(R.id.editText_password);
 

@@ -214,6 +214,10 @@ public class DashBoardActivity extends AppCompatActivity
 				intent = new Intent(this, NewFormActivity.class);
 				startActivity(intent);
 				break;
+			case R.id.new_store:
+				intent = new Intent(this, NewStoreActivity.class);
+				startActivity(intent);
+				break;
 			case R.id.logout:
 				intent = new Intent(this, LoginActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
