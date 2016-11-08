@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -45,6 +46,13 @@ private Context context;
 		setContentView(R.layout.activity_my_store);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
+
+		// add back arrow to toolbar
+		if (getSupportActionBar() != null)
+		{
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+			getSupportActionBar().setDisplayShowHomeEnabled(true);
+		}
 		context=this;
 		queue = Volley.newRequestQueue(this);
 		gridview_myStores=(GridView)findViewById(R.id.gridview_myStores);
@@ -90,12 +98,13 @@ private Context context;
 		}
 
 		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
+		public View getView(final int position, View convertView, ViewGroup parent) {
 			// Get the data item for this position
 			Store user = getItem(position);
 			// Check if an existing view is being reused, otherwise inflate the view
 			ViewHolder viewHolder; // view lookup cache stored in tag
 			if (convertView == null) {
+
 				// If there's no view to re-use, inflate a brand new view for row
 				viewHolder = new ViewHolder();
 				LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -119,6 +128,16 @@ private Context context;
 			viewHolder.textView_tags.setText("Random Stuff");
 			viewHolder.textView_name.setText(user.getName());
 			// Return the completed view to render on screen
+			convertView.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					Intent intent=new Intent(context,NewStoreActivity.class);
+					Log.e(TAG, "onClick: "+myStores.get(position).getId() );
+					intent.putExtra("storeid",myStores.get(position).getId());
+					intent.putExtra("mode","EDIT");
+					startActivity(intent);
+				}
+			});
 			return convertView;
 		}
 	}
@@ -157,5 +176,15 @@ private Context context;
 		queue.add(postRequest);
 
 	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		// handle arrow click here
+		if (item.getItemId() == android.R.id.home)
+		{
+			finish(); // close this activity and return to preview activity (if there is any)
+		}
 
+		return super.onOptionsItemSelected(item);
+	}
 }

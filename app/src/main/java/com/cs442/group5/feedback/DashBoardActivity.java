@@ -39,16 +39,7 @@ public class DashBoardActivity extends AppCompatActivity
 		setSupportActionBar(toolbar);
 
 
-		/*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-		fab.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View view)
-			{
-				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-						.setAction("Action", null).show();
-			}
-		});*/
+
 
 		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -87,73 +78,13 @@ public class DashBoardActivity extends AppCompatActivity
 
 
 
-		/*if (getIntent().getExtras().containsKey("user"))
-		{
-			User user = User.getInstance();
-			if (user != null)
-			{
-				textView_userName.setText(user.getUserName());
-				textView_email.setText(user.getEmail());
-			}
-		}*/
 
-		/*GridView gridView = (GridView) findViewById(R.id.gridView_dasboard_list);
-		gridView.setClickable(true);
-		for (int i = 1; i < 26; i++)
-			itemList.add("Form " + i);
-		MenuItemListAdapter arrayAdapter = new MenuItemListAdapter(this, itemList);
-		gridView.setAdapter(arrayAdapter);
-		arrayAdapter.notifyDataSetChanged();
-*/
+
+
 
 	}
 
-	/*private class MenuItemListAdapter extends ArrayAdapter<String>
-	{
-		Context context;
-		private final ArrayList<String> menuList;
 
-		public MenuItemListAdapter(Context context, ArrayList<String> items)
-		{
-			super(context, 0, items);
-			this.context = context;
-			this.menuList = items;
-		}
-
-		@Override
-		public int getCount()
-		{
-			return menuList.size();
-		}
-
-		@Override
-		public String getItem(int pos)
-		{
-			return menuList.get(pos);
-		}
-
-		@Override
-		public long getItemId(int position)
-		{
-			return position;
-		}
-
-		@Override
-		public View getView(final int position, View convertView, ViewGroup parent)
-		{
-			View v = convertView;
-			if (v == null)
-			{
-				LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				v = vi.inflate(R.layout.form_list_item, null);
-			}
-			String item = getItem(position);
-			View itemView = v;
-			TextView textView_id = (TextView) v.findViewById(R.id.textView_formName);
-			textView_id.setText(item);
-			return itemView;
-		}
-	}*/
 
 	@Override
 	public void onBackPressed()

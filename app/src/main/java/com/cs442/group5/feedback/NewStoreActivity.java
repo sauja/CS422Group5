@@ -8,9 +8,11 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.NestedScrollView;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -22,26 +24,32 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.cs442.group5.feedback.model.Store;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class NewStoreActivity extends FragmentActivity implements OnMapReadyCallback{
+
+
+
+public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCallback{
 
 	private static final String TAG=NewStoreActivity.class.getSimpleName();
 	Location mLastLocation;
 	LocationManager locationManager;
 	private GoogleMap mMap;
 	RequestQueue queue;
-	String ownerid="";
+	String id="";
 	private Context context = this;
 	private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-
+	Store store;
 	EditText editText_name;
 	EditText editText_address;
 	EditText editText_Location;
@@ -61,6 +69,14 @@ public class NewStoreActivity extends FragmentActivity implements OnMapReadyCall
 		SmoothScrollMapFragment mapFragment = (SmoothScrollMapFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.map);
 		mapFragment.getMapAsync(this);
+		final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+		// add back arrow to toolbar
+		if (getSupportActionBar() != null)
+		{
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+			getSupportActionBar().setDisplayShowHomeEnabled(true);
+		}
 		final NestedScrollView scrollView = (NestedScrollView) findViewById(R.id.content_new_store2);
 		editText_name = (EditText) findViewById(R.id.editText_name);
 		editText_address = (EditText) findViewById(R.id.editText_address);
@@ -84,27 +100,27 @@ public class NewStoreActivity extends FragmentActivity implements OnMapReadyCall
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				if(validateFields())
-				{
-					if(getIntent().getExtras().containsKey("mode"))
-					{
-						if(getIntent().getExtras().get("mode").equals("EDIT"))
-						{}
+				if(validateFields()) {
+					if(getIntent().getExtras().containsKey("mode")) {
+						if(getIntent().getExtras().get("mode").equals("EDIT")) {
+
+						}
 					}
-					else
-						addStore();
+					else addStore();
 				}
-				else
-					Toast.makeText(context, "Please enter all fields", Toast.LENGTH_SHORT).show();
+				else Toast.makeText(context, "Please enter all fields", Toast.LENGTH_SHORT).show();
 			}
 		});
 
+		if(getIntent().getExtras()!=null&&getIntent().getExtras().containsKey("storeid"))
+		{
+			getStore(getIntent().getExtras().get("storeid").toString());
+			toolbar.setTitle("Edit Store");
+		}
+		// add back arrow to toolbar
 
 
 	}
-
-
-
 	@Override
 	public void onMapReady(GoogleMap googleMap) {
 		mMap = googleMap;
@@ -130,6 +146,7 @@ public class NewStoreActivity extends FragmentActivity implements OnMapReadyCall
 		mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 		mMap.getUiSettings().setZoomControlsEnabled( true );
 		mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
 		mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
 			@Override
 			public boolean onMyLocationButtonClick() {
@@ -151,17 +168,12 @@ public class NewStoreActivity extends FragmentActivity implements OnMapReadyCall
 			}
 		});
 		if (location != null) {
-			LatLng latLng=new LatLng(location.getLatitude(),location.getLatitude());
-			googleMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(),location.getLatitude())).title("Start"));
-			mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLatitude()), mMap.getCameraPosition().zoom));
+			LatLng latLng=new LatLng(location.getLatitude(),location.getLongitude());
+			Log.e(TAG, "onMapReady: "+latLng );
+			googleMap.addMarker(new MarkerOptions().position(latLng).title("Start"));
+			mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
 		}
 	}
-
-
-
-
-
-
 	public void addStore()
 	{
 		final String url=context.getString(R.string.server_url)+"/store/addStore";
@@ -194,12 +206,54 @@ public class NewStoreActivity extends FragmentActivity implements OnMapReadyCall
 				parameters.put("website", editText_website.getText().toString());
 				parameters.put("gpsLat", String.valueOf(gps.latitude));
 				parameters.put("gpsLng", String.valueOf(gps.longitude));
-				parameters.put("ownerid", ownerid);
+				parameters.put("ownerid", "1");
 				return parameters;
 			}
 		};
 		queue.add(postRequest);
 
+	}
+	public void updateFields(Store store){
+		if(store!=null&&store.getName().length()>0)
+		{
+			this.store=store;
+			editText_name.setText(store.getName());
+			editText_address.setText(store.getAddress());
+			editText_Location.setText(store.getLocation());
+			editText_zipcode.setText(store.getZipcode());
+			editText_phone_no.setText(store.getPhone_no());
+			editText_emailid.setText(store.getEmailid());
+			editText_website.setText(store.getWebsite());
+		}
+	}
+	public void getStore(final String id)
+	{
+		final String url=context.getString(R.string.server_url)+"/store/getStore";
+
+		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>(){
+			@Override
+			public void onResponse(String response) {
+				Gson gson=new Gson();
+
+				Store store=gson.fromJson(response,new TypeToken<Store>() {}.getType());
+				updateFields(store);
+
+			}
+		},new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+
+				Log.e("error",error.toString());
+			}
+		}) {
+			@Override
+			protected Map<String, String> getParams() throws AuthFailureError {
+				Map<String, String> parameters = new HashMap<String, String>();
+				parameters.put("id", id);
+				return parameters;
+			}
+		};
+		queue.add(postRequest);
 	}
 
 	private boolean validateFields()
@@ -208,5 +262,17 @@ public class NewStoreActivity extends FragmentActivity implements OnMapReadyCall
 				||editText_name.length()<1||editText_website.length()<1||editText_zipcode.length()<1)
 		return false;
 		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		// handle arrow click here
+		if (item.getItemId() == android.R.id.home)
+		{
+			finish(); // close this activity and return to preview activity (if there is any)
+		}
+
+		return super.onOptionsItemSelected(item);
 	}
 }
