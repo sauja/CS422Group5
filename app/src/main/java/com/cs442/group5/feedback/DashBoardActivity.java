@@ -9,13 +9,28 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
+import com.cs442.group5.feedback.model.Store;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 
@@ -24,11 +39,12 @@ import io.fabric.sdk.android.Fabric;
 public class DashBoardActivity extends AppCompatActivity
 		implements NavigationView.OnNavigationItemSelectedListener
 {
-	GridView gridView;
-	TextView textView_userName;
-	TextView textView_email;
-	ArrayList<String> itemList = new ArrayList<>();
-
+	private static final String TAG = "DashBoardActivity";
+	Context context;
+	RequestQueue queue;
+	ArrayList<Store> myStores;
+	GridView gridview_myStores;
+	MyStoreDashboardArrayAdapter arrayAdapter;
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -37,9 +53,9 @@ public class DashBoardActivity extends AppCompatActivity
 		setContentView(R.layout.activity_dash_board);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
+		context=this;
 
-
-
+		gridview_myStores=(GridView)findViewById(R.id.gridview_dashboard);
 
 		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -50,31 +66,25 @@ public class DashBoardActivity extends AppCompatActivity
 		NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 		navigationView.setNavigationItemSelectedListener(this);
 		View headerView = navigationView.getHeaderView(0);
-		textView_userName = (TextView) headerView.findViewById(R.id.textView_userName);
-		textView_email = (TextView) headerView.findViewById(R.id.textView_email);
-		ImageView imageView=(ImageView)headerView.findViewById(R.id.imageView_profile);
-		final Context context=this;
-		imageView.setOnClickListener(new View.OnClickListener()
+		queue = Volley.newRequestQueue(this);
+		getMyStores();
+		if(myStores!=null)
 		{
+			arrayAdapter=new MyStoreDashboardArrayAdapter(context,myStores);
+			gridview_myStores.setAdapter(arrayAdapter);
+			arrayAdapter.notifyDataSetChanged();
+		}
+		Log.e(TAG, "onCreate: " );
+		gridview_myStores.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
-			public void onClick(View view)
-			{
-				Intent intent = new Intent(context, MyProfileActivity.class);
-				//intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-				startActivity(intent);
-				//finish();
-			}
-		});
-		ImageView imageView4=(ImageView) findViewById(R.id.imageView_img);
-		imageView4.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View view)
-			{
+			public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 				Intent intent=new Intent(context,StoreActivity.class);
+				intent.putExtra("storeid",myStores.get(i).getId());
 				startActivity(intent);
+
 			}
 		});
+
 
 
 
@@ -84,7 +94,92 @@ public class DashBoardActivity extends AppCompatActivity
 
 	}
 
+	private class MyStoreDashboardArrayAdapter extends ArrayAdapter<Store>
+	{
+		private  class ViewHolder {
+			ImageView imageView_img;
+			TextView textView_rating;
+			TextView textView_name;
+			TextView textView_address;
+			TextView textView_tags;
+		}
+		public MyStoreDashboardArrayAdapter(Context context, ArrayList<Store> store) {
+			super(context, R.layout.store_list_item, store);
+		}
 
+		@Override
+		public View getView(final int position, View convertView, ViewGroup parent) {
+			// Get the data item for this position
+			Store user = getItem(position);
+			// Check if an existing view is being reused, otherwise inflate the view
+			ViewHolder viewHolder; // view lookup cache stored in tag
+			if (convertView == null) {
+
+				// If there's no view to re-use, inflate a brand new view for row
+				viewHolder = new ViewHolder();
+				LayoutInflater inflater = LayoutInflater.from(getContext());
+				convertView = inflater.inflate(R.layout.store_list_item, parent, false);
+				viewHolder.textView_rating = (TextView) convertView.findViewById(R.id.textView_rating);
+				viewHolder.textView_name = (TextView) convertView.findViewById(R.id.textView_name);
+				viewHolder.textView_address = (TextView) convertView.findViewById(R.id.textView_address);
+				viewHolder.textView_tags = (TextView) convertView.findViewById(R.id.textView_tags);
+				viewHolder.imageView_img = (ImageView) convertView.findViewById(R.id.imageView_img);
+
+				// Cache the viewHolder object inside the fresh view
+				convertView.setTag(viewHolder);
+			} else {
+				// View is being recycled, retrieve the viewHolder object from tag
+				viewHolder = (ViewHolder) convertView.getTag();
+			}
+			// Populate the data from the data object via the viewHolder object
+			// into the template view.
+			viewHolder.textView_rating.setText("  3.5  ");
+			viewHolder.textView_address.setText(user.getAddress());
+			viewHolder.textView_tags.setText("Random Stuff");
+			viewHolder.textView_name.setText(user.getName());
+			// Return the completed view to render on screen
+			convertView.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					Intent intent=new Intent(context,StoreActivity.class);
+					Log.e(TAG, "onClick: "+myStores.get(position).getId() );
+					intent.putExtra("storeid",myStores.get(position).getId());
+
+					startActivity(intent);
+				}
+			});
+			return convertView;
+		}
+	}
+	public void getMyStores()
+	{
+		final String url=context.getString(R.string.server_url)+"/store/getAllStores";
+		Log.e(TAG, "getMyStores: " );
+		StringRequest postRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>(){
+			@Override
+			public void onResponse(String response) {
+				Log.e(TAG, "onResponse: " );
+				if(response!=null&&response.length()>0) {
+					Gson gson=new Gson();
+					myStores=gson.fromJson(response,new TypeToken<ArrayList<Store>>() {}.getType());
+					arrayAdapter=new MyStoreDashboardArrayAdapter(context,myStores);
+					gridview_myStores.setAdapter(arrayAdapter);
+					arrayAdapter.notifyDataSetChanged();
+				}
+			}
+		},new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				Log.e(TAG, "onErrorResponse: " );
+				if(error!=null)
+					Toast.makeText(context, "Network Error", Toast.LENGTH_LONG).show();
+				Log.e("error",error.toString());
+			}
+		});
+
+		queue.add(postRequest);
+
+	}
 
 	@Override
 	public void onBackPressed()

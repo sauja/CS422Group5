@@ -72,7 +72,7 @@ public class StoreService {
 		String feeds  = null;
 		try 
 		{
-System.out.println("getMyStores");
+			System.out.println("getMyStores");
 			ArrayList<Store> feedData = null;
 			StoreManager projectManager= new StoreManager();
 			feedData = projectManager.getMyStores(ownerid);

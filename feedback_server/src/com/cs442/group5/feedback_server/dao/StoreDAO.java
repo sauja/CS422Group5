@@ -15,7 +15,8 @@ public class StoreDAO
 		ArrayList<Store> feedData = new ArrayList<Store>();
 		try
 		{
-			PreparedStatement ps = (connection).prepareStatement("SELECT `id`,`name`,`address`,`location`,`zipcode`,`phone_no`,`emailid`,`website`,`gpsLat`,`gpsLng`,`ownerid` FROM `store` ORDER BY id DESC");
+			PreparedStatement ps = (connection).prepareStatement("SELECT `id`,`name`,`address`,`location` FROM `store` ORDER BY id DESC");
+			System.out.println("SELECT `id`,`name`,`address`,`location` FROM `store` ORDER BY id DESC");
 			ResultSet rs = ps.executeQuery();
 			while(rs.next())
 			{
@@ -24,13 +25,8 @@ public class StoreDAO
 				storeObject.setName(rs.getString("name"));
 				storeObject.setAddress(rs.getString("address"));
 				storeObject.setLocation(rs.getString("location"));
-				storeObject.setZipcode(rs.getString("zipcode"));
-				storeObject.setPhone_no(rs.getString("phone_no"));
-				storeObject.setEmailid(rs.getString("emailid"));
-				storeObject.setWebsite(rs.getString("website"));
-				storeObject.setGpsLat(rs.getString("gpsLat"));
-				storeObject.setGpsLng(rs.getString("gpsLng"));
-				storeObject.setOwnerID(rs.getString("ownerid"));
+
+				
 
 				feedData.add(storeObject);
 			}
@@ -97,12 +93,13 @@ public class StoreDAO
 			return "false";
 		}
 	}
-	public Store getMyStores(Connection connection,long ownerid) throws Exception
+	public ArrayList<Store> getMyStores(Connection connection,long ownerid) throws Exception
 	{
-		Store feedData =null;
+		ArrayList<Store> feedData = new ArrayList<Store>();
 		try
 		{
-			PreparedStatement ps = (connection).prepareStatement("SELECT `id`,`name`,`address`,`location`,`zipcode`,`phone_no`,`emailid`,`website`,`gpsLat`,`gpsLng`,`ownerid` FROM `store` where ownerid="+ownerid+" ORDER BY id DESC");
+			PreparedStatement ps = (connection).prepareStatement("SELECT `id`,`name`,`address`,`location` FROM `store` where ownerid="+ownerid+" ORDER BY id DESC");
+			System.out.println("SELECT `id`,`name`,`address`,`location` FROM `store` where ownerid="+ownerid+" ORDER BY id DESC");
 			ResultSet rs = ps.executeQuery();
 			while(rs.next())
 			{
@@ -111,15 +108,10 @@ public class StoreDAO
 				storeObject.setName(rs.getString("name"));
 				storeObject.setAddress(rs.getString("address"));
 				storeObject.setLocation(rs.getString("location"));
-				storeObject.setZipcode(rs.getString("zipcode"));
-				storeObject.setPhone_no(rs.getString("phone_no"));
-				storeObject.setEmailid(rs.getString("emailid"));
-				storeObject.setWebsite(rs.getString("website"));
-				storeObject.setGpsLat(rs.getString("gpsLat"));
-				storeObject.setGpsLng(rs.getString("gpsLng"));
-				storeObject.setOwnerID(rs.getString("ownerid"));
-				if(storeObject.getName()!=null)
-					feedData=storeObject;
+
+				
+
+				feedData.add(storeObject);
 			}
 			return feedData;
 		}

@@ -1,35 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content_dash_board"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="8dp"
-    android:paddingLeft="8dp"
-    android:paddingRight="8dp"
-    android:paddingTop="8dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.cs442.group5.feedback.DashBoardActivity"
     tools:showIn="@layout/app_bar_dash_board">
-    <include layout="@layout/store_list_item"
-             android:id="@+id/item1"></include>
-<!--
+
     <GridView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/gridView_dasboard_list"
-        tools:listitem="@layout/form_list_item"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:horizontalSpacing="10dp"
+        android:verticalSpacing="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:id="@+id/gridview_dashboard"
         android:numColumns="3"
-        android:horizontalSpacing="8dp"
-        android:verticalSpacing="8dp"
-        android:stretchMode="columnWidth"
-        android:gravity="center"
-        android:longClickable="true"
-        android:clickable="true"
-        android:contextClickable="false"
-        android:choiceMode="multipleChoice"/>-->
-</RelativeLayout>
+        tools:listitem="@layout/store_list_item"
+        android:choiceMode="singleChoice"/>
+</android.support.constraint.ConstraintLayout>

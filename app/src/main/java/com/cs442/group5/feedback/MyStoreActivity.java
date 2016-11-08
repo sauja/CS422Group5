@@ -39,7 +39,7 @@ private Context context;
 	RequestQueue queue;
 	ArrayList<Store> myStores;
 	GridView gridview_myStores;
-	MyStroreArrayAdapter arrayAdapter;
+	MyStoreArrayAdapter arrayAdapter;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -68,7 +68,7 @@ private Context context;
 		getMyStores();
 		if(myStores!=null)
 		{
-			arrayAdapter=new MyStroreArrayAdapter(context,myStores);
+			arrayAdapter=new MyStoreArrayAdapter(context,myStores);
 			gridview_myStores.setAdapter(arrayAdapter);
 			arrayAdapter.notifyDataSetChanged();
 		}
@@ -84,7 +84,7 @@ private Context context;
 			}
 		});
 	}
-	private class MyStroreArrayAdapter extends ArrayAdapter<Store>
+	private class MyStoreArrayAdapter extends ArrayAdapter<Store>
 	{
 		private  class ViewHolder {
 			ImageView imageView_img;
@@ -93,7 +93,7 @@ private Context context;
 			TextView textView_address;
 			TextView textView_tags;
 		}
-		public MyStroreArrayAdapter(Context context, ArrayList<Store> store) {
+		public MyStoreArrayAdapter(Context context, ArrayList<Store> store) {
 			super(context, R.layout.store_list_item, store);
 		}
 
@@ -152,7 +152,7 @@ private Context context;
 				if(response!=null&&response.length()>0) {
 					 Gson gson=new Gson();
 					myStores=gson.fromJson(response,new TypeToken<ArrayList<Store>>() {}.getType());
-					arrayAdapter=new MyStroreArrayAdapter(context,myStores);
+					arrayAdapter=new MyStoreArrayAdapter(context,myStores);
 					gridview_myStores.setAdapter(arrayAdapter);
 					arrayAdapter.notifyDataSetChanged();
 				}

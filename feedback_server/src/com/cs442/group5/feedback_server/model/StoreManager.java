@@ -56,7 +56,7 @@ public class StoreManager {
 			    Database database= new Database();
 			    Connection connection = database.Get_Connection();
 			    StoreDAO project= new StoreDAO();
-				feeds=project.getAllStores(connection);
+				feeds=project.getMyStores(connection, ownerid);
 		
 		} catch (Exception e) {
 			throw e;
