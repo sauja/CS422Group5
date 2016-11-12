@@ -50,6 +50,7 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 	private Context context = this;
 	private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 	Store store;
+	Boolean isEditable=false;
 	EditText editText_name;
 	EditText editText_address;
 	EditText editText_Location;
@@ -101,11 +102,8 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 			@Override
 			public void onClick(View view) {
 				if(validateFields()) {
-					if(getIntent().getExtras().containsKey("mode")) {
-						if(getIntent().getExtras().get("mode").equals("EDIT")) {
-
-						}
-					}
+					if(isEditable)
+					{}
 					else addStore();
 				}
 				else Toast.makeText(context, "Please enter all fields", Toast.LENGTH_SHORT).show();
@@ -116,8 +114,10 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 		{
 			getStore(getIntent().getExtras().get("storeid").toString());
 			toolbar.setTitle("Edit Store");
+
 		}
-		// add back arrow to toolbar
+		if(getIntent().getExtras()!=null&&getIntent().getExtras().containsKey("mode"))
+			isEditable=true;
 
 
 	}

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -11,93 +11,83 @@
     tools:showIn="@layout/app_bar_my_profile">
 
 
-    <ImageView
-        android:layout_width="0dp"
-        android:layout_height="150dp"
-        app:srcCompat="@drawable/myprofilebackground"
-        android:id="@+id/profile_background"
-        android:scaleType="fitXY"
-        tools:layout_constraintTop_creator="1"
-        tools:layout_constraintRight_creator="1"
-        app:layout_constraintRight_toRightOf="parent"
-        tools:layout_constraintLeft_creator="1"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-    <EditText
-        android:layout_height="wrap_content"
-        android:inputType="none|textPersonName"
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:id="@+id/prof"
+        android:layout_height="wrap_content">
 
-        android:hint="Username"
-        android:ems="10"
-        android:id="@+id/editText_userName"
-        android:layout_width="0dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginStart="16dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintHorizontal_bias="0.37"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/editText_emailid"
-        android:clickable="false"
-        />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="110dp">
 
-    <EditText
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="120dp"
+                app:srcCompat="@drawable/account_outline"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:id="@+id/profilepic"
+                android:layout_weight="0.5" />
 
-        android:hint="Password"
-        android:ems="10"
-        android:id="@+id/editText_password"
-        android:layout_marginStart="16dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/editText_userName"
-        android:inputType="textPassword"/>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5">
 
-    <EditText
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:id="@+id/editText_fname"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:hint="First Name"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintHorizontal_bias="0.9"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/profile_background"/>
+                <TextView
+                    android:text="Name:"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/usrName"
+                    android:paddingTop="10dp"
+                    android:layout_weight="1"
+                    android:textAppearance="@android:style/TextAppearance.Holo.Medium" />
 
-    <EditText
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:id="@+id/editText_lname"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/editText_fname"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:hint="Last Name"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintHorizontal_bias="0.62"/>
+                <TextView
+                    android:text="Hello Boys"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/nameData"
+                    android:paddingTop="5dp"
+                    android:layout_weight="1" />
 
-    <EditText
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:inputType="textEmailAddress"
-        android:ems="10"
-        android:id="@+id/editText_emailid"
-        android:hint="Email"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/editText_lname"
-        android:layout_marginStart="16dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintRight_toRightOf="parent"/>
+                <TextView
+                    android:text="Email:"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/email"
+                    android:paddingTop="10dp"
+                    android:layout_weight="1"
+                    android:textAppearance="@android:style/TextAppearance.Holo.Medium" />
 
-</android.support.constraint.ConstraintLayout>
+                <TextView
+                    android:text="hello@google.com"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/emailData"
+                    android:paddingTop="5dp"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+    <Button
+        android:text="Dashboard"
+        android:layout_width="match_parent"
+        android:id="@+id/dash"
+        android:layout_below="@+id/prof"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:text="Sign Out"
+        android:layout_width="match_parent"
+        android:id="@+id/signout"
+        android:layout_below="@+id/dash"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>

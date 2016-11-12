@@ -63,5 +63,4 @@ public class StoreManager {
 		}
 		return feeds;
 	}
-
 }
