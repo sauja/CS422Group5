@@ -40,7 +40,11 @@ public class MyProfileActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_my_profile);
-
+		if (getSupportActionBar() != null)
+		{
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+			getSupportActionBar().setDisplayShowHomeEnabled(true);
+		}
 		profilepic = (ImageView) findViewById(R.id.profilepic);
 		name = (TextView) findViewById(R.id.nameData);
 		email = (TextView) findViewById(R.id.emailData);

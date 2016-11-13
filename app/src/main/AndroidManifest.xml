@@ -46,11 +46,6 @@
         <activity android:name=".MyProfileActivity">
         </activity>
         <activity android:name=".StoreActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
         </activity>
 
         <meta-data

@@ -76,7 +76,11 @@ public class DirectionsActivity extends AppCompatActivity implements OnMapReadyC
 			Intent intent = getIntent();
 			Bundle extras = getIntent().getExtras();
 
-
+			if (getSupportActionBar() != null)
+			{
+				getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+				getSupportActionBar().setDisplayShowHomeEnabled(true);
+			}
 			String location = intent.getStringExtra("address");
 
 			//String location =  extras.getString("address");

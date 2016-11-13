@@ -54,6 +54,11 @@ public class StoreActivity extends AppCompatActivity implements View.OnClickList
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_store);
+		if (getSupportActionBar() != null)
+		{
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+			getSupportActionBar().setDisplayShowHomeEnabled(true);
+		}
 		context=this;
 		Intent intent = getIntent();
 		layout = (FABToolbarLayout) findViewById(R.id.fabtoolbar);
