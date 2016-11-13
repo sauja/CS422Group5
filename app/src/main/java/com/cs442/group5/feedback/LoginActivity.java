@@ -107,6 +107,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
         });
         mAuth = FirebaseAuth.getInstance();
 
+
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -137,7 +138,27 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 
         getLoaderManager().initLoader(0, null, this);
     }
+    public void onResetPassword(View view) {
+        if (mEmailView.getText().length() < 6)
+            Toast.makeText(this, "Please enter correct email", Toast.LENGTH_SHORT).show();
+        else {
+            mProgressView.setVisibility(View.VISIBLE);
+            mAuth.sendPasswordResetEmail(mEmailView.getText().toString())
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(LoginActivity.this, "We have sent you instructions to reset your password!", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(LoginActivity.this, "Failed to send reset email!", Toast.LENGTH_SHORT).show();
+                            }
 
+                            mProgressView.setVisibility(View.GONE);
+                        }
+                    });
+        }
+
+    }
     private boolean mayRequestContacts() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return true;

@@ -95,11 +95,21 @@
                     android:textStyle="bold" />
 
                 <Button
-                    android:text="Sign up"
+                    android:text="Not a memeber? Sign Up now."
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/signup"
-                    style="@android:style/Widget.Material.Light.Button.Borderless" />
+                    style="@android:style/Widget.Material.Light.Button.Borderless"
+                    android:textAllCaps="false"/>
+
+                <TextView
+                    android:text="Forgot your password?"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView_resetPassword"
+                    android:gravity="center_horizontal"
+                    android:onClick="onResetPassword"
+                    />
 
             </LinearLayout>
         </ScrollView>

@@ -13,9 +13,19 @@ public class Store {
 	String gpsLat;
 	String gpsLng;
 	String phone_no;
+
+	public String getTags() {
+		return tags;
+	}
+
+	public void setTags(String tags) {
+		this.tags = tags;
+	}
+
 	String emailid;
 	String website;
 	String ownerID;
+	String tags;
 	float rating;
 
 	public float getRating() {

@@ -31,6 +31,7 @@ import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
 import com.cs442.group5.feedback.model.Store;
 import com.cs442.group5.feedback.utils.RatingColor;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -69,7 +70,7 @@ public class DashBoardActivity extends AppCompatActivity
 		navigationView.setNavigationItemSelectedListener(this);
 		View headerView = navigationView.getHeaderView(0);
 		queue = Volley.newRequestQueue(this);
-		getMyStores();
+		getAllStores();
 		if(myStores!=null)
 		{
 			arrayAdapter=new MyStoreDashboardArrayAdapter(context,myStores);
@@ -135,12 +136,12 @@ public class DashBoardActivity extends AppCompatActivity
 			}
 			// Populate the data from the data object via the viewHolder object
 			// into the template view.
-			viewHolder.textView_rating.setText((String.valueOf(store.getRating())));
+			viewHolder.textView_rating.setText((String.valueOf(store.getRating())).substring(0,3));
 			int color= RatingColor.getRatingColor(store.getRating(),context);
 			((GradientDrawable)viewHolder.textView_rating.getBackground()).setStroke(10, color);
 			((GradientDrawable)viewHolder.textView_rating.getBackground()).setColor( color);
 			viewHolder.textView_address.setText(store.getAddress()+"\n"+store.getLocation());
-			viewHolder.textView_tags.setText("Random Stuff");
+			viewHolder.textView_tags.setText(store.getTags());
 			viewHolder.textView_name.setText(store.getName());
 			// Return the completed view to render on screen
 			convertView.setOnClickListener(new View.OnClickListener() {
@@ -156,7 +157,7 @@ public class DashBoardActivity extends AppCompatActivity
 			return convertView;
 		}
 	}
-	public void getMyStores()
+	public void getAllStores()
 	{
 		final String url=context.getString(R.string.server_url)+"/store/getAllStores";
 		Log.e(TAG, "getMyStores: " );
@@ -250,6 +251,8 @@ public class DashBoardActivity extends AppCompatActivity
 				startActivity(intent);
 				break;
 			case R.id.logout:
+				FirebaseAuth mAuth=FirebaseAuth.getInstance();
+				mAuth.signOut();
 				intent = new Intent(this, LoginActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);
@@ -272,4 +275,5 @@ public class DashBoardActivity extends AppCompatActivity
 		drawer.closeDrawer(GravityCompat.START);
 		return true;
 	}
+
 }

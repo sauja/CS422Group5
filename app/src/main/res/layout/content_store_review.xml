@@ -5,9 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:layout_collapseParallaxMultiplier="1.0"
-    app:cardElevation="4dp"
-    app:contentPadding="4dp"
-    android:id="@+id/cardView_review">
+    app:cardElevation="1dp"
+    app:contentPadding="8dp"
+    android:id="@+id/cardView_review"
+    app:cardPreventCornerOverlap="false"
+    app:cardUseCompatPadding="true"
+    >
 <android.support.constraint.ConstraintLayout
                                              android:orientation="vertical"
                                              android:layout_width="match_parent"
@@ -19,8 +22,8 @@
 
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_width="50dp"
-        android:layout_height="50dp"/>
+        android:layout_width="25dp"
+        android:layout_height="25dp"/>
 
     <TextView
         android:text="TextView"
@@ -42,7 +45,7 @@
         app:layout_constraintLeft_toLeftOf="parent"/>
 
     <TextView
-        android:text="TextView"
+        android:text="0.0"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/textView_rating"

@@ -20,7 +20,7 @@ android {
     buildToolsVersion "24.0.3"
     defaultConfig {
         applicationId "com.cs442.group5.feedback"
-        minSdkVersion 22
+        minSdkVersion 21
         targetSdkVersion 21
         multiDexEnabled true
         versionCode 1
@@ -87,7 +87,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.6.2'
 
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:recyclerview-v7:25.0.0'
+
 }
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
