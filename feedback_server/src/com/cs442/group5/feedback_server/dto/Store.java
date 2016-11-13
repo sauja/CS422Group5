@@ -11,6 +11,7 @@ public class Store {
 	String phone_no;
 	String emailid;
 	String website;
+	float rating;
 	String ownerID;
 	public Store() {
 		// TODO Auto-generated constructor stub
@@ -94,6 +95,14 @@ public class Store {
 
 	public void setGpsLng(String gpsLng) {
 		this.gpsLng = gpsLng;
+	}
+
+	public float getRating() {
+		return rating;
+	}
+
+	public void setRating(float rating) {
+		this.rating = rating;
 	}
 
 }

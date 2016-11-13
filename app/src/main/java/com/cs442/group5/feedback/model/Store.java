@@ -16,6 +16,16 @@ public class Store {
 	String emailid;
 	String website;
 	String ownerID;
+	float rating;
+
+	public float getRating() {
+		return rating;
+	}
+
+	public void setRating(float rating) {
+		this.rating = rating;
+	}
+
 	public Store() {
 		// TODO Auto-generated constructor stub
 	}

@@ -2,6 +2,7 @@ package com.cs442.group5.feedback;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -29,6 +30,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
 import com.cs442.group5.feedback.model.Store;
+import com.cs442.group5.feedback.utils.RatingColor;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -110,7 +112,7 @@ public class DashBoardActivity extends AppCompatActivity
 		@Override
 		public View getView(final int position, View convertView, ViewGroup parent) {
 			// Get the data item for this position
-			Store user = getItem(position);
+			Store store = getItem(position);
 			// Check if an existing view is being reused, otherwise inflate the view
 			ViewHolder viewHolder; // view lookup cache stored in tag
 			if (convertView == null) {
@@ -133,10 +135,13 @@ public class DashBoardActivity extends AppCompatActivity
 			}
 			// Populate the data from the data object via the viewHolder object
 			// into the template view.
-			viewHolder.textView_rating.setText("  3.5  ");
-			viewHolder.textView_address.setText(user.getAddress());
+			viewHolder.textView_rating.setText((String.valueOf(store.getRating())));
+			int color= RatingColor.getRatingColor(store.getRating(),context);
+			((GradientDrawable)viewHolder.textView_rating.getBackground()).setStroke(10, color);
+			((GradientDrawable)viewHolder.textView_rating.getBackground()).setColor( color);
+			viewHolder.textView_address.setText(store.getAddress()+"\n"+store.getLocation());
 			viewHolder.textView_tags.setText("Random Stuff");
-			viewHolder.textView_name.setText(user.getName());
+			viewHolder.textView_name.setText(store.getName());
 			// Return the completed view to render on screen
 			convertView.setOnClickListener(new View.OnClickListener() {
 				@Override

@@ -379,6 +379,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
                         if (!task.isSuccessful()) {
                             Toast.makeText(SignUpActivity.this, "Creating Account Failed. Try Again!",
                                     Toast.LENGTH_SHORT).show();
+	                        showProgress(false);
                         }
                         else {
 

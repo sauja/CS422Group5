@@ -34,7 +34,9 @@
             android:textStyle="normal|bold"
             android:textAlignment="center"
             app:layout_constraintTop_toTopOf="@+id/textView_name"
-            app:layout_constraintBottom_toBottomOf="@+id/textView_tags"/>
+            app:layout_constraintBottom_toBottomOf="@+id/textView_tags"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"/>
 
         <TextView
             android:text="Giordano's"

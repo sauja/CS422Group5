@@ -4,9 +4,11 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -114,6 +116,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                     //TODO - Sent an Intent to Dashboard Activity
+                    SharedPreferences sharedpreferences=getSharedPreferences("user", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedpreferences.edit();
+                    editor.putString("uid", user.getUid());
+                    editor.commit();
                     Intent intent = new Intent(LoginActivity.this, DashBoardActivity.class);
                     startActivity(intent);
                 } else {

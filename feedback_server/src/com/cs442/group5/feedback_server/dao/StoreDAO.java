@@ -15,7 +15,7 @@ public class StoreDAO
 		ArrayList<Store> feedData = new ArrayList<Store>();
 		try
 		{
-			PreparedStatement ps = (connection).prepareStatement("SELECT `id`,`name`,`address`,`location` FROM `store` ORDER BY id DESC");
+			PreparedStatement ps = (connection).prepareStatement("SELECT `id`,`name`,`address`,`location`,`rating` FROM `store` ORDER BY id DESC");
 			System.out.println("SELECT `id`,`name`,`address`,`location` FROM `store` ORDER BY id DESC");
 			ResultSet rs = ps.executeQuery();
 			while(rs.next())
@@ -25,7 +25,7 @@ public class StoreDAO
 				storeObject.setName(rs.getString("name"));
 				storeObject.setAddress(rs.getString("address"));
 				storeObject.setLocation(rs.getString("location"));
-
+				storeObject.setRating(rs.getFloat("rating"));
 				
 
 				feedData.add(storeObject);
@@ -42,7 +42,7 @@ public class StoreDAO
 		Store feedData =null;
 		try
 		{
-			PreparedStatement ps = (connection).prepareStatement("SELECT `id`,`name`,`address`,`location`,`zipcode`,`phone_no`,`emailid`,`website`,`gpsLat`,`gpsLng`,`ownerid` FROM `store` where id="+id+" ORDER BY id DESC");
+			PreparedStatement ps = (connection).prepareStatement("SELECT `id`,`name`,`address`,`location`,`zipcode`,`phone_no`,`emailid`,`website`,`gpsLat`,`gpsLng`,`ownerid`,`rating` FROM `store` where id="+id+" ORDER BY id DESC");
 			ResultSet rs = ps.executeQuery();
 			while(rs.next())
 			{
@@ -58,6 +58,7 @@ public class StoreDAO
 				storeObject.setGpsLat(rs.getString("gpsLat"));
 				storeObject.setGpsLng(rs.getString("gpsLng"));
 				storeObject.setOwnerID(rs.getString("ownerid"));
+				storeObject.setRating(rs.getFloat("rating"));
 				if(storeObject.getName()!=null)
 					feedData=storeObject;
 			}
