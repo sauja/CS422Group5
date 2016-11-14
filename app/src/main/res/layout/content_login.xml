@@ -94,14 +94,6 @@
                     android:text="Log in"
                     android:textStyle="bold" />
 
-                <Button
-                    android:text="Not a memeber? Sign Up now."
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/signup"
-                    style="@android:style/Widget.Material.Light.Button.Borderless"
-                    android:textAllCaps="false"/>
-
                 <TextView
                     android:text="Forgot your password?"
                     android:layout_width="match_parent"
@@ -109,8 +101,36 @@
                     android:id="@+id/textView_resetPassword"
                     android:gravity="center_horizontal"
                     android:onClick="onResetPassword"
-                    />
+                    android:textColor="@color/colorPrimaryDark"/>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <Button
+                        android:text="Not a memeber? Sign Up now."
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/signup"
+                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        android:textAllCaps="false"
+                        android:layout_gravity="center_horizontal"
+                        android:paddingTop="16dp"
+                        android:background="@drawable/rounded_call_button"
+                        tools:layout_gravity="center_horizontal"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        />
 
+                    <com.google.android.gms.common.SignInButton
+                        android:id="@+id/gsignin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        tools:layout_gravity="fill_horizontal"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        />
+                </RelativeLayout>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

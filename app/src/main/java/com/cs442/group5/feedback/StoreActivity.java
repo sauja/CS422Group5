@@ -8,9 +8,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -37,11 +39,15 @@ import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.cs442.group5.feedback.model.Review;
 import com.cs442.group5.feedback.model.Store;
+import com.cs442.group5.feedback.utils.CustomSwipeAdapter;
 import com.cs442.group5.feedback.utils.RatingColor;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnPausedListener;
 import com.google.firebase.storage.OnProgressListener;
@@ -56,27 +62,28 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class StoreActivity extends AppCompatActivity implements View.OnClickListener
 {
-	public static final String EXTRA_NAME = "cheese_name";
+
 	private static final String TAG="StoreActivity";
 	private Context context;
 	RequestQueue queue;
-	//private FABToolbarLayout layout;
+
 	TextView textView_name;
 	TextView textView_address;
 	TextView textView_Location;
-	TextView textView_zipcode;
-	TextView textView_phone_no;
-	TextView textView_emailid;
-	TextView textView_website;
+
 	TextView textView_rating;
 	String storeid="";
 	ArrayList<Review> reviewList;
 	Store store;
+	ViewPager viewPager_storeImages;
+	CustomSwipeAdapter customSwipeAdapter;
+	ArrayList<String> Userlist;
 
-	static int count;
+
 	static String string_download_url;
 	private StorageReference mStorage;
 	private DatabaseReference mdatabse;
@@ -88,25 +95,64 @@ public class StoreActivity extends AppCompatActivity implements View.OnClickList
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_store);
+
+		final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+		queue = Volley.newRequestQueue(this);
+		context=this;
 		mdatabse = FirebaseDatabase.getInstance().getReference();
 		mStorage = FirebaseStorage.getInstance().getReference();
 		nProg = new ProgressDialog(this);
-		df = FirebaseDatabase.getInstance().getReference("users").child("url");
+
 		if (getSupportActionBar() != null)
 		{
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 			getSupportActionBar().setDisplayShowHomeEnabled(true);
 		}
-		context=this;
-		Intent intent = getIntent();
-		//layout = (FABToolbarLayout) findViewById(R.id.fabtoolbar);
-		//fab = (FloatingActionButton)findViewById(R.id.fabtoolbar_fab);
-		//final String cheeseName = intent.getStringExtra(EXTRA_NAME);
-		queue = Volley.newRequestQueue(this);
-		final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		ImageView backdrop=(ImageView)findViewById(R.id.backdrop);
+
+		if(getIntent().getExtras()!=null&&getIntent().getExtras().containsKey("storeid"))
+		{
+			storeid=getIntent().getExtras().get("storeid").toString();
+
+			new AsyncTask<Void,Void,Void>(){
+
+
+				@Override
+				protected Void doInBackground(Void... voids) {
+					getStore(storeid);
+					getAllReviews(Integer.parseInt(storeid));
+					return null;
+				}
+			}.execute();
+
+
+
+		}
+
+
+
+		viewPager_storeImages=(ViewPager) findViewById(R.id.viewPager_storeImages);
+		df = FirebaseDatabase.getInstance().getReference("StoreImages/"+storeid);
+		df.addListenerForSingleValueEvent(new ValueEventListener() {
+			@Override
+			public void onDataChange(DataSnapshot dataSnapshot) {
+				Userlist = new ArrayList<String>();
+				for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+					//Picasso.with(getApplicationContext()).load(String.valueOf(dsp.getValue())).into(img);
+					Userlist.add(String.valueOf(dsp.getValue()));
+					customSwipeAdapter = new CustomSwipeAdapter(context,Userlist);
+					viewPager_storeImages.setAdapter(customSwipeAdapter);
+					customSwipeAdapter.notifyDataSetChanged();
+				}}
+
+			@Override
+			public void onCancelled(DatabaseError databaseError) {
+
+			}
+		});
+
 
 		collapsingToolbar =
 				(CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
@@ -116,14 +162,7 @@ public class StoreActivity extends AppCompatActivity implements View.OnClickList
 		textView_address = (TextView) findViewById(R.id.textView_address);
 		textView_Location = (TextView) findViewById(R.id.textView_location);
 		textView_rating=(TextView) findViewById(R.id.textView_rating);
-		if(getIntent().getExtras()!=null&&getIntent().getExtras().containsKey("storeid"))
-		{
-			storeid=getIntent().getExtras().get("storeid").toString();
 
-			getStore(storeid);
-			getAllReviews(Integer.parseInt(storeid));
-
-		}
 		/*fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -163,14 +202,7 @@ public class StoreActivity extends AppCompatActivity implements View.OnClickList
 
 	}
 
-	@Override
-	public void onBackPressed() {
-		//if(layout.isToolbar())
-		//	layout.hide();
-		//else
-		finish();
 
-	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -293,6 +325,7 @@ public class StoreActivity extends AppCompatActivity implements View.OnClickList
 					+"\n"+store.getWebsite());
 			textView_Location.setText(store.getLocation());
 			collapsingToolbar.setTitle(store.getName());
+			collapsingToolbar.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 			textView_rating.setText(String.valueOf(store.getRating()).substring(0,3));
 			int color= RatingColor.getRatingColor(store.getRating(),context);
 			((GradientDrawable)textView_rating.getBackground()).setStroke(10, color);
@@ -392,36 +425,34 @@ public class StoreActivity extends AppCompatActivity implements View.OnClickList
 		if(requestCode==GALLERY_INTENT && resultCode == RESULT_OK){
 			nProg.setMessage("Uploading....");
 			nProg.show();
-			System.out.println("shivani");
+
 			Uri uri = data.getData();
-			count = count + 1;
-			System.out.println(uri);
 			StorageReference filepath = mStorage.child("StoreImages/"+store.getId()).child(uri.getLastPathSegment());
 			filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>(){
 				@Override
 				public void onSuccess(UploadTask.TaskSnapshot taskSnapshot){
 					string_download_url = taskSnapshot.getDownloadUrl().toString();
-					mdatabse.child("StoreImages").child(String.valueOf(store.getId())).child(String.valueOf(count)).setValue(string_download_url);
-					System.out.println("Success");
+					mdatabse.child("StoreImages/"+store.getId()).child(String.valueOf(UUID.randomUUID())).setValue(string_download_url);
+
 					Toast.makeText(StoreActivity.this, "Upload Done", Toast.LENGTH_SHORT).show();
 					nProg.dismiss();
 				}
 			}).addOnFailureListener(new OnFailureListener() {
 				@Override
 				public void onFailure(@NonNull Exception e) {
-					System.out.println("Failure "+e);
+
 
 				}
 			}).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
 				@Override
 				public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
 					double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-					System.out.println("Upload is " + progress + "% done");
+
 				}
 			}).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
 				@Override
 				public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
-					System.out.println("Upload is paused");
+
 				}
 			});
 

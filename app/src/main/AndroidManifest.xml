@@ -19,6 +19,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".SplashScreen"
+            android:noHistory="true"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/SplashTheme">
             <intent-filter>
@@ -27,11 +28,13 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity"/>
+        <activity android:name=".LoginActivity"
+                  android:noHistory="true"/>
         <activity
             android:name=".DashBoardActivity"
             android:label="@string/title_activity_dash_board"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            >
         </activity>
         <activity android:name=".NewFormActivity">
         </activity>
@@ -49,7 +52,8 @@
         </activity>
         <activity android:name=".StoreActivity">
         </activity>
-        <activity android:name=".SignUpActivity">
+        <activity android:name=".SignUpActivity"
+                 >
         </activity>
 
         <meta-data
