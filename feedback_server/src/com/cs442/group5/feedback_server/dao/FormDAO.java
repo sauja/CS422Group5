@@ -3,8 +3,10 @@ package com.cs442.group5.feedback_server.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import com.cs442.group5.feedback_server.dto.Form;
+import com.cs442.group5.feedback_server.utils.Constants;
 
 
 public class FormDAO {
@@ -23,10 +25,17 @@ public class FormDAO {
 			int rs = ps.executeUpdate();
 			return "true";
 		}
-		catch(Exception e)
+		
+		catch(SQLException e)
 		{
-			System.out.println(e);
-			return "false";
+			if(e.getErrorCode()==Constants.MYSQL_DUPLICATE_PK)
+			{
+				System.out.println("Duplicate formID");
+				return ""+Constants.MYSQL_DUPLICATE_PK;
+			}
+			System.out.println(e.getMessage());
+			return ""+e.getErrorCode()+" "+e.getMessage();
+			
 		}
 	}
 	public Form getForm(Connection connection,long id) throws Exception

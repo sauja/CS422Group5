@@ -3,23 +3,19 @@ package com.cs442.group5.feedback;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -64,195 +60,56 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class StoreActivity extends AppCompatActivity implements View.OnClickListener
-{
-
+public class StoreActivity extends AppCompatActivity {
 	private static final String TAG="StoreActivity";
-	private Context context;
-	RequestQueue queue;
-
-	TextView textView_name;
-	TextView textView_address;
-	TextView textView_Location;
-
-	TextView textView_rating;
-	String storeid="";
-	ArrayList<Review> reviewList;
-	Store store;
-	ViewPager viewPager_storeImages;
+	ViewPager viewPager;
 	CustomSwipeAdapter customSwipeAdapter;
-	ArrayList<String> Userlist;
-
-
+	Context context;
 	static String string_download_url;
 	private StorageReference mStorage;
 	private DatabaseReference mdatabse;
-	DatabaseReference df;
 	ProgressDialog nProg;
+	RequestQueue queue;
+	Store store;
+	ArrayList<Review> reviewList;
 	private static final int GALLERY_INTENT = 2;
 	CollapsingToolbarLayout collapsingToolbar;
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_store);
-
+		context=this;
+		queue = Volley.newRequestQueue(this);
 		final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-		queue = Volley.newRequestQueue(this);
-		context=this;
-		mdatabse = FirebaseDatabase.getInstance().getReference();
-		mStorage = FirebaseStorage.getInstance().getReference();
-		nProg = new ProgressDialog(this);
-
 		if (getSupportActionBar() != null)
-		{
-			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 			getSupportActionBar().setDisplayShowHomeEnabled(true);
-		}
+		collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
 
-		if(getIntent().getExtras()!=null&&getIntent().getExtras().containsKey("storeid"))
-		{
-			storeid=getIntent().getExtras().get("storeid").toString();
-
-			new AsyncTask<Void,Void,Void>(){
-
-
-				@Override
-				protected Void doInBackground(Void... voids) {
-					getStore(storeid);
-					getAllReviews(Integer.parseInt(storeid));
-					return null;
-				}
-			}.execute();
-
-
-
-		}
-
-
-
-		viewPager_storeImages=(ViewPager) findViewById(R.id.viewPager_storeImages);
+		viewPager = (ViewPager) findViewById(R.id.viewPager_storeImages);
+		DatabaseReference df;
+		String storeid=""+getIntent().getExtras().get("storeid");
 		df = FirebaseDatabase.getInstance().getReference("StoreImages/"+storeid);
 		df.addListenerForSingleValueEvent(new ValueEventListener() {
 			@Override
 			public void onDataChange(DataSnapshot dataSnapshot) {
-				Userlist = new ArrayList<String>();
-				for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-					//Picasso.with(getApplicationContext()).load(String.valueOf(dsp.getValue())).into(img);
+				ArrayList<String> Userlist = new ArrayList<>();
+				for (DataSnapshot dsp : dataSnapshot.getChildren())
 					Userlist.add(String.valueOf(dsp.getValue()));
-					customSwipeAdapter = new CustomSwipeAdapter(context,Userlist);
-					viewPager_storeImages.setAdapter(customSwipeAdapter);
-					customSwipeAdapter.notifyDataSetChanged();
-				}}
-
+				customSwipeAdapter = new CustomSwipeAdapter(context,Userlist);
+				viewPager.setAdapter(customSwipeAdapter);
+				customSwipeAdapter.notifyDataSetChanged();
+				Log.e("On Data changed", "onDataChange: "+Userlist.size() );}
 			@Override
-			public void onCancelled(DatabaseError databaseError) {
-
-			}
+			public void onCancelled(DatabaseError databaseError) {}
 		});
+		getStore(storeid);
+		getAllReviews(Integer.parseInt(storeid));
 
+		mdatabse = FirebaseDatabase.getInstance().getReference();
+		mStorage = FirebaseStorage.getInstance().getReference();
+		nProg = new ProgressDialog(this);
 
-		collapsingToolbar =
-				(CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-
-
-		textView_name = (TextView) findViewById(R.id.textView_name);
-		textView_address = (TextView) findViewById(R.id.textView_address);
-		textView_Location = (TextView) findViewById(R.id.textView_location);
-		textView_rating=(TextView) findViewById(R.id.textView_rating);
-
-		/*fab.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				layout.show();
-			}
-		});*/
-		Button btn_getDirections=(Button) findViewById(R.id.btn_getDirections);
-		btn_getDirections.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				Intent intent = new Intent(StoreActivity.this, DirectionsActivity.class);
-
-
-				String sendMessage = store.getGpsLat()+","+store.getGpsLng();
-				//put the text inside the intent and send it to another Activity
-				intent.putExtra("address", sendMessage);
-				//start the activity
-				startActivity(intent);
-			}
-		});
-	}
-	public void onCall(View view)
-	{
-		AlertDialog.Builder dialog = new AlertDialog.Builder(context);
-		dialog.setMessage("Do you want to call "+store.getName())
-				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialoginterface, int i) {
-						dialoginterface.cancel();
-					}})
-				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialoginterface, int i) {
-						Intent callIntent = new Intent(Intent.ACTION_CALL);
-						callIntent.setData(Uri.parse("tel:"+store.getPhone_no()));
-						startActivity(callIntent);
-					}
-				}).show();
-
-	}
-
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-
-			case android.R.id.home:
-				finish();
-				break;
-			default:
-				break;
-		}
-
-		return super.onOptionsItemSelected(item);
-	}
-	@Override
-	public void onClick(View v) {
-		Toast.makeText(this, "Element clicked", Toast.LENGTH_SHORT).show();
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		//getMenuInflater().inflate(R.menu.sample_actions, menu);
-		return true;
-	}
-
-	public void getStore(final String id)
-	{
-		final String url=context.getString(R.string.server_url)+"/store/getStore";
-
-		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>(){
-			@Override
-			public void onResponse(String response) {
-				Gson gson=new Gson();
-				Store store=gson.fromJson(response,new TypeToken<Store>() {}.getType());
-				updateFields(store);
-			}
-		},new Response.ErrorListener() {
-			@Override
-			public void onErrorResponse(VolleyError error) {
-
-				Log.e("error",error.toString());
-			}
-		}) {
-			@Override
-			protected Map<String, String> getParams() throws AuthFailureError {
-				Map<String, String> parameters = new HashMap<String, String>();
-				parameters.put("id", id);
-				return parameters;
-			}
-		};
-		queue.add(postRequest);
 	}
 	public void getAllReviews(final int id)
 	{
@@ -282,6 +139,88 @@ public class StoreActivity extends AppCompatActivity implements View.OnClickList
 			}
 		};
 		queue.add(postRequest);
+	}
+	private void updateReviewFields() {
+		int j=2;
+		LinearLayout item = (LinearLayout) findViewById(R.id.ll_store);
+		if(reviewList.size()<2)
+			j=reviewList.size();
+		for(int i=0;i<j;i++)
+		{
+			Review r=reviewList.get(i);
+			CardView child=(CardView) getLayoutInflater().inflate(R.layout.content_store_review,null);
+			TextView textView_name = (TextView) child.findViewById(R.id.textView_name);
+			TextView textView_date = (TextView) child.findViewById(R.id.textView_date);
+			TextView textView_rating = (TextView) child.findViewById(R.id.textView_rating);
+			TextView textView_comment = (TextView) child.findViewById(R.id.textView_comment);
+
+			textView_name.setText(r.getUid());
+			textView_date.setText(new SimpleDateFormat("MMM dd, yyyy").format(r.getTimestamp()));
+			textView_rating.setText((String.valueOf(r.getRating())).substring(0, 3));
+			int color = RatingColor.getRatingColor(r.getRating(), context);
+			((GradientDrawable) textView_rating.getBackground()).setStroke(10, color);
+			((GradientDrawable) textView_rating.getBackground()).setColor(color);
+			textView_comment.setText(r.getComment());
+
+			item.addView(child);
+		}
+		if(reviewList.size()>2) {
+			Button button = new Button(this, null, R.style.Widget_AppCompat_Button_Borderless);
+			button.setText("More Reviews");
+			button.setHeight((int) getResources().getDimension(R.dimen.button_height));
+			button.setGravity(Gravity.RIGHT | Gravity.CENTER);
+			item.addView(button);
+			button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					Intent intent=new Intent(StoreActivity.this,MoreReviewsActivity.class);
+					intent.putExtra("reviewList",new Gson().toJson(reviewList));
+					intent.putExtra("storeid",store.getId());
+					startActivity(intent);
+					Toast.makeText(context, "More Reviews", Toast.LENGTH_SHORT).show();
+				}
+			});
+		}
+
+
+	}
+
+	public void rateMe(View view)
+	{
+		Toast.makeText(context, "rateMe", Toast.LENGTH_SHORT).show();
+		final Dialog openDialog = new Dialog(context);
+		openDialog.setContentView(R.layout.content_store_add_review);
+		openDialog.setTitle("Custom Dialog Box");
+
+		Button btn_close = (Button)openDialog.findViewById(R.id.btn_close);
+		btn_close.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				openDialog.cancel();
+			}
+		});
+		Button btn_add = (Button)openDialog.findViewById(R.id.btn_add);
+		btn_add.setOnClickListener(new View.OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				SharedPreferences sharedpreferences=getSharedPreferences("firebaseUser", Context.MODE_PRIVATE);
+				if(sharedpreferences.contains("uid")) {
+					RatingBar ratingBar = (RatingBar) openDialog.findViewById(R.id.ratingBar);
+					EditText editText_comment = (EditText) openDialog.findViewById(R.id.editText_comment);
+					Review r = new Review();
+					r.setComment(editText_comment.getText().toString());
+					r.setStoreid(store.getId());
+					r.setRating(ratingBar.getRating());
+
+					r.setUid(sharedpreferences.getString("uid","")) ;
+					addReview(r);
+				}
+				else
+					Toast.makeText(context, "Please login again", Toast.LENGTH_SHORT).show();
+				openDialog.dismiss();
+			}
+		});
+		openDialog.show();
 	}
 	public void addReview(final Review r)
 	{
@@ -314,9 +253,47 @@ public class StoreActivity extends AppCompatActivity implements View.OnClickList
 		};
 		queue.add(postRequest);
 	}
+	public void addPhotos(View view)
+	{
+		Toast.makeText(context, "Add Photos", Toast.LENGTH_SHORT).show();
+		Intent intent = new Intent(Intent.ACTION_PICK);
+		intent.setType("image/n");
+		startActivityForResult(intent,GALLERY_INTENT);
+	}
+	public void getStore(final String id)
+	{
+		final String url=context.getString(R.string.server_url)+"/store/getStore";
+
+		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>(){
+			@Override
+			public void onResponse(String response) {
+				Gson gson=new Gson();
+				Store store=gson.fromJson(response,new TypeToken<Store>() {}.getType());
+				updateFields(store);
+			}
+		},new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+
+				Log.e("error",error.toString());
+			}
+		}) {
+			@Override
+			protected Map<String, String> getParams() throws AuthFailureError {
+				Map<String, String> parameters = new HashMap<String, String>();
+				parameters.put("id", id);
+				return parameters;
+			}
+		};
+		queue.add(postRequest);
+	}
 	public void updateFields(Store store){
 		if(store!=null&&store.getName().length()>0)
 		{
+			TextView textView_name = (TextView) findViewById(R.id.textView_name);
+			TextView textView_address = (TextView) findViewById(R.id.textView_address);
+			TextView textView_Location = (TextView) findViewById(R.id.textView_location);
+			TextView textView_rating=(TextView) findViewById(R.id.textView_rating);
 			this.store=store;
 			textView_name.setText(store.getName());
 			textView_address.setText(store.getAddress()
@@ -338,7 +315,7 @@ public class StoreActivity extends AppCompatActivity implements View.OnClickList
 						.marker(StaticMap.Marker.Style.RED, new StaticMap.GeoPoint(store.getAddress()+" "+store.getLocation()))
 						.size(320, 240);
 				try {
-					Glide.with(StoreActivity.this).load(map.toURL())
+					Glide.with(this).load(map.toURL())
 							.into(imageView_staticMap);
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
@@ -346,80 +323,10 @@ public class StoreActivity extends AppCompatActivity implements View.OnClickList
 			}
 		}
 	}
-	public void addPhotos(View view)
+	public void getDirections(View view)
 	{
-		Toast.makeText(context, "Add Photos", Toast.LENGTH_SHORT).show();
-		Intent intent = new Intent(Intent.ACTION_PICK);
-		intent.setType("image/n");
-		startActivityForResult(intent,GALLERY_INTENT);
+		Toast.makeText(context, "get directions", Toast.LENGTH_SHORT).show();
 	}
-	public void addReview(View view)
-	{
-		Toast.makeText(context, "addReview", Toast.LENGTH_SHORT).show();
-	}
-	public void rateMe(View view)
-	{
-		Toast.makeText(context, "rateMe", Toast.LENGTH_SHORT).show();
-		final Dialog openDialog = new Dialog(context);
-		openDialog.setContentView(R.layout.content_store_add_review);
-		openDialog.setTitle("Custom Dialog Box");
-
-		Button btn_close = (Button)openDialog.findViewById(R.id.btn_close);
-		btn_close.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				openDialog.cancel();
-			}
-		});
-		Button btn_add = (Button)openDialog.findViewById(R.id.btn_add);
-		btn_add.setOnClickListener(new View.OnClickListener(){
-			@Override
-			public void onClick(View v) {
-				SharedPreferences sharedpreferences=getSharedPreferences("user", Context.MODE_PRIVATE);
-				if(sharedpreferences.contains("uid")) {
-					RatingBar ratingBar = (RatingBar) openDialog.findViewById(R.id.ratingBar);
-					EditText editText_comment = (EditText) openDialog.findViewById(R.id.editText_comment);
-					Review r = new Review();
-					r.setComment(editText_comment.getText().toString());
-					r.setStoreid(Integer.parseInt(storeid));
-					r.setRating(ratingBar.getRating());
-
-					r.setUid(sharedpreferences.getString("uid","")) ;
-					addReview(r);
-				}
-				else
-					Toast.makeText(context, "Please login again", Toast.LENGTH_SHORT).show();
-				openDialog.dismiss();
-			}
-		});
-		openDialog.show();
-	}
-
-
-
-	private void updateReviewFields() {
-
-		LinearLayout item = (LinearLayout) findViewById(R.id.ll_store);
-		for(Review r:reviewList) {
-
-			CardView child =(CardView) getLayoutInflater().inflate(R.layout.content_store_review, null);
-			TextView textView_name = (TextView) child.findViewById(R.id.textView_name);
-			textView_name.setText(r.getUid());
-			TextView textView_date = (TextView) child.findViewById(R.id.textView_date);
-			;
-			textView_date.setText(new SimpleDateFormat("MMM dd, yyyy").format(r.getTimestamp()));
-			TextView textView_rating = (TextView) child.findViewById(R.id.textView_rating);
-			textView_rating.setText((String.valueOf(r.getRating())).substring(0,3));
-			int color= RatingColor.getRatingColor(r.getRating(),context);
-			((GradientDrawable)textView_rating.getBackground()).setStroke(10, color);
-			((GradientDrawable)textView_rating.getBackground()).setColor( color);
-			TextView textView_comment = (TextView) child.findViewById(R.id.textView_comment);
-			textView_comment.setText(r.getComment());
-			item.addView(child);
-		}
-	}
-
-	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if(requestCode==GALLERY_INTENT && resultCode == RESULT_OK){
@@ -458,6 +365,5 @@ public class StoreActivity extends AppCompatActivity implements View.OnClickList
 
 		}
 	}
-
-
 }
+

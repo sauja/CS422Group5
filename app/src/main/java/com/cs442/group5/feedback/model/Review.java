@@ -9,7 +9,7 @@ package com.cs442.group5.feedback.model;
 
 public class Review {
 	int id;
-	int storeid;
+	long storeid;
 	String uid;
 	String comment;
 	float rating;
@@ -20,10 +20,10 @@ public class Review {
 	public void setId(int id) {
 		this.id = id;
 	}
-	public int getStoreid() {
+	public long getStoreid() {
 		return storeid;
 	}
-	public void setStoreid(int storeid) {
+	public void setStoreid(long storeid) {
 		this.storeid = storeid;
 	}
 	public String getUid() {
@@ -51,5 +51,13 @@ public class Review {
 		this.timestamp = timestamp;
 	}
 
-
+	@Override
+	public String toString() {
+		return "id "+id+"\n"+
+				"storeid "+storeid+"\n"+
+				"uid "+uid+"\n"+
+				"comment "+comment+"\n"+
+				"rating "+rating+"\n"+
+				"date "+timestamp;
+	}
 }

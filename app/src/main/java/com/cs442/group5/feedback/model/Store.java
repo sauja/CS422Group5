@@ -13,6 +13,12 @@ public class Store {
 	String gpsLat;
 	String gpsLng;
 	String phone_no;
+	String imgurl;
+	String emailid;
+	String website;
+	String ownerID;
+	String tags;
+	float rating;
 
 	public String getTags() {
 		return tags;
@@ -22,11 +28,15 @@ public class Store {
 		this.tags = tags;
 	}
 
-	String emailid;
-	String website;
-	String ownerID;
-	String tags;
-	float rating;
+
+
+	public String getImgurl() {
+		return imgurl;
+	}
+
+	public void setImgurl(String imgurl) {
+		this.imgurl = imgurl;
+	}
 
 	public float getRating() {
 		return rating;

@@ -31,6 +31,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.cs442.group5.feedback.model.User;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -42,9 +50,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -52,7 +63,7 @@ import static android.Manifest.permission.READ_CONTACTS;
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>, GoogleApiClient.OnConnectionFailedListener {
-
+	private final String TAG = "LoginActivity";
 	/**
 	 * Id to identity READ_CONTACTS permission request.
 	 */
@@ -62,7 +73,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 	private UserLoginTask mAuthTask = null;
 	private GoogleSignInOptions gso;
 	private GoogleApiClient mGoogleApiClient;
-
+Context context;
 	// UI references.
 	private AutoCompleteTextView mEmailView;
 	private EditText mPasswordView;
@@ -73,7 +84,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 	private FirebaseAuth mAuth;
 	private FirebaseAuth.AuthStateListener mAuthListener;
 
-	private final String TAG = "Auth: ";
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +93,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 		// Set up the login form.
 		mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
 		populateAutoComplete();
-
+context=this;
 		mPasswordView = (EditText) findViewById(R.id.password);
 		mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			@Override
@@ -121,15 +132,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 			@Override
 			public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
 				Log.d(TAG, "onAuthStateChanged");
-				FirebaseUser user = firebaseAuth.getCurrentUser();
-				if (user != null) {
+				FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+				if (firebaseUser != null) {
 					// User is signed in
-					Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+					Log.d(TAG, "onAuthStateChanged:signed_in:" + firebaseUser.getUid()+"\nToken: "+FirebaseInstanceId.getInstance().getToken());
 					//TODO - Sent an Intent to Dashboard Activity
-					SharedPreferences sharedpreferences=getSharedPreferences("user", Context.MODE_PRIVATE);
+					SharedPreferences sharedpreferences=getSharedPreferences("firebaseUser", Context.MODE_PRIVATE);
 					SharedPreferences.Editor editor = sharedpreferences.edit();
-					editor.putString("uid", user.getUid());
+					editor.putString("uid", firebaseUser.getUid());
 					editor.commit();
+					User user=new User();
+
+					;
+
+					updateUser(firebaseUser.getUid(), FirebaseInstanceId.getInstance().getToken());
+
 					Intent intent = new Intent(LoginActivity.this, DashBoardActivity.class);
 					startActivity(intent);
 				} else {
@@ -154,7 +171,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 		gsignin.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				Toast.makeText(getApplicationContext(), "Google Sign In", Toast.LENGTH_SHORT).show();
+				Toast.makeText(context, "Google Sign In", Toast.LENGTH_SHORT).show();
 				Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
 				startActivityForResult(signInIntent, RC_SIGN_IN);
 			}
@@ -457,6 +474,38 @@ public class LoginActivity extends AppCompatActivity implements LoaderManager.Lo
 			mAuthTask = null;
 			showProgress(false);
 		}
+	}
+	public void updateUser(final String uuid, final String tokenid)
+	{
+		RequestQueue queue= Volley.newRequestQueue(this);
+
+		final String url=context.getString(R.string.server_url)+"/user/updateUser";
+		Log.d(TAG, "updateUser: " );
+		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>(){
+			@Override
+			public void onResponse(String response) {
+				Log.e(TAG, "onResponse: " +response);
+
+
+			}
+		},new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				Log.e(TAG, "onErrorResponse: " );
+				if(error!=null)
+
+					Log.e("error",error.toString());
+			}
+		}) {
+			@Override
+			protected Map<String, String> getParams() throws AuthFailureError {
+				Map<String, String> parameters = new HashMap<String, String>();
+				parameters.put("uid", uuid);
+				parameters.put("address", tokenid);
+				return parameters;
+			}
+		};
+		queue.add(postRequest);
 	}
 }
 

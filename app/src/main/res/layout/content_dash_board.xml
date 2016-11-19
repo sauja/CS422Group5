@@ -10,7 +10,7 @@
     tools:context="com.cs442.group5.feedback.DashBoardActivity"
     tools:showIn="@layout/app_bar_dash_board">
 
-    <GridView
+    <ListView
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:horizontalSpacing="10dp"
@@ -24,7 +24,7 @@
         android:layout_marginStart="16dp"
         app:layout_constraintLeft_toLeftOf="parent"
         android:id="@+id/gridview_dashboard"
-        android:numColumns="1"
+
         tools:listitem="@layout/store_list_item"
         android:choiceMode="singleChoice"/>
 </android.support.constraint.ConstraintLayout>

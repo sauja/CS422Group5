@@ -2,6 +2,7 @@ package com.cs442.group5.feedback;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -12,13 +13,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,8 +29,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.crashlytics.android.Crashlytics;
+import com.bumptech.glide.Glide;
 import com.cs442.group5.feedback.model.Store;
+import com.cs442.group5.feedback.utils.Libs;
 import com.cs442.group5.feedback.utils.RatingColor;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.gson.Gson;
@@ -37,7 +39,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 
-import io.fabric.sdk.android.Fabric;
+
 
 public class DashBoardActivity extends AppCompatActivity
 		implements NavigationView.OnNavigationItemSelectedListener
@@ -46,19 +48,23 @@ public class DashBoardActivity extends AppCompatActivity
 	Context context;
 	RequestQueue queue;
 	ArrayList<Store> myStores;
-	GridView gridview_myStores;
+	ListView gridview_myStores;
 	MyStoreDashboardArrayAdapter arrayAdapter;
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		Fabric.with(this, new Crashlytics());
+		Log.e(TAG, "onCreate: " );
 		setContentView(R.layout.activity_dash_board);
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
 		context=this;
 
-		gridview_myStores=(GridView)findViewById(R.id.gridview_dashboard);
+
+		myStores=new ArrayList<>();
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+
+
+		gridview_myStores=(ListView) findViewById(R.id.gridview_dashboard);
 
 		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -70,23 +76,9 @@ public class DashBoardActivity extends AppCompatActivity
 		navigationView.setNavigationItemSelectedListener(this);
 		View headerView = navigationView.getHeaderView(0);
 		queue = Volley.newRequestQueue(this);
-		getAllStores();
-		if(myStores!=null)
-		{
-			arrayAdapter=new MyStoreDashboardArrayAdapter(context,myStores);
-			gridview_myStores.setAdapter(arrayAdapter);
-			arrayAdapter.notifyDataSetChanged();
-		}
-		Log.e(TAG, "onCreate: " );
-		gridview_myStores.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-				Intent intent=new Intent(context,StoreActivity.class);
-				intent.putExtra("storeid",myStores.get(i).getId());
-				startActivity(intent);
 
-			}
-		});
+		Log.e(TAG, "onCreate: " );
+
 
 
 
@@ -96,16 +88,63 @@ public class DashBoardActivity extends AppCompatActivity
 
 
 	}
+	@Override
+	protected  void onResume()
+	{
+		super.onResume();
+		Log.e(TAG, "onResume: " );
+		final SharedPreferences sf=getSharedPreferences("dashboard",MODE_PRIVATE);
+		if(sf.contains("myStores"))
+		{
 
+
+			myStores.clear();
+			Log.e(TAG, "run: " );
+			myStores=new Gson().fromJson(sf.getString("myStores",""),new TypeToken<ArrayList<Store>>(){}.getType());
+			if(myStores.size()>0)
+			{
+				arrayAdapter=new MyStoreDashboardArrayAdapter(context,myStores);
+				gridview_myStores.setAdapter(arrayAdapter);
+				arrayAdapter.notifyDataSetChanged();}
+			else
+				getAllStores();
+
+
+
+		}
+		else {
+			Log.e(TAG, "onResume: getting all stores" );
+
+			getAllStores();
+
+		}
+
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Log.e(TAG, "onPause: " );
+		SharedPreferences sf=getSharedPreferences("dashboard",MODE_PRIVATE);
+		SharedPreferences.Editor edit=sf.edit();
+		edit.putString("myStores",new Gson().toJson(myStores));
+		edit.commit();
+		onStop();
+	}
+
+	private static class ViewHolder
+	{
+		ImageView imageView_img;
+		TextView textView_rating;
+		TextView textView_name;
+		TextView textView_address;
+		TextView textView_tags;
+	}
 	private class MyStoreDashboardArrayAdapter extends ArrayAdapter<Store>
 	{
-		private  class ViewHolder {
-			ImageView imageView_img;
-			TextView textView_rating;
-			TextView textView_name;
-			TextView textView_address;
-			TextView textView_tags;
-		}
+
+
+
 		public MyStoreDashboardArrayAdapter(Context context, ArrayList<Store> store) {
 			super(context, R.layout.store_list_item, store);
 		}
@@ -143,6 +182,7 @@ public class DashBoardActivity extends AppCompatActivity
 			viewHolder.textView_address.setText(store.getAddress()+"\n"+store.getLocation());
 			viewHolder.textView_tags.setText(store.getTags());
 			viewHolder.textView_name.setText(store.getName());
+			Glide.with(context).load(store.getImgurl()).into(viewHolder.imageView_img);
 			// Return the completed view to render on screen
 			convertView.setOnClickListener(new View.OnClickListener() {
 				@Override
@@ -150,7 +190,7 @@ public class DashBoardActivity extends AppCompatActivity
 					Intent intent=new Intent(context,StoreActivity.class);
 					Log.e(TAG, "onClick: "+myStores.get(position).getId() );
 					intent.putExtra("storeid",myStores.get(position).getId());
-
+					Log.e(TAG, "onClick: "+ myStores.get(position).getId());
 					startActivity(intent);
 				}
 			});
@@ -200,7 +240,7 @@ public class DashBoardActivity extends AppCompatActivity
 		}
 	}
 
-	/*@Override
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -223,7 +263,7 @@ public class DashBoardActivity extends AppCompatActivity
 		}
 
 		return super.onOptionsItemSelected(item);
-	}*/
+	}
 
 	@SuppressWarnings("StatementWithEmptyBody")
 	@Override
@@ -242,6 +282,14 @@ public class DashBoardActivity extends AppCompatActivity
 				break;
 			case R.id.dashboard:
 				break;
+			case R.id.logout:
+				FirebaseAuth mAuth= Libs.getFirebaseAuth();
+				mAuth.signOut();
+				intent = new Intent(this, LoginActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(intent);
+				finish();
+				break;
 			case R.id.new_form:
 				intent = new Intent(this, NewFormActivity.class);
 				startActivity(intent);
@@ -250,14 +298,7 @@ public class DashBoardActivity extends AppCompatActivity
 				intent = new Intent(this, MyStoreActivity.class);
 				startActivity(intent);
 				break;
-			case R.id.logout:
-				FirebaseAuth mAuth=FirebaseAuth.getInstance();
-				mAuth.signOut();
-				intent = new Intent(this, LoginActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-				startActivity(intent);
-				finish();
-				break;
+
 			case R.id.TandC:
 				intent = new Intent(this, TermsNConditions.class);
 				intent.putExtra("webviewName", "TermsNConditions");
