@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -33,13 +34,20 @@ public class MoreReviewsActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_more_reviews);
 		context=this;
 		reviewList=new Gson().fromJson(getIntent().getExtras().get("reviewList").toString(),new TypeToken<ArrayList<Review>>() {}.getType());
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
 
+		// add back arrow to toolbar
+		if (getSupportActionBar() != null)
+		{
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+			getSupportActionBar().setDisplayShowHomeEnabled(true);
+		}
 		ListView listView_reviews=(ListView) findViewById(R.id.listView_reviews);
 		MyReviewAdapter myReviewAdapter=new MyReviewAdapter(context,reviewList);
 		listView_reviews.setAdapter(myReviewAdapter);
 		myReviewAdapter.notifyDataSetChanged();
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
+
 
 
 	}
@@ -90,7 +98,7 @@ public class MoreReviewsActivity extends AppCompatActivity {
 			}
 			// Populate the data from the data object via the viewHolder object
 			// into the template view.
-			viewHolder.textView_name.setText(review.getUid());
+			viewHolder.textView_name.setText(review.getFullname());
 
 			viewHolder.textView_date.setText(new SimpleDateFormat("MMM dd, yyyy").format(review.getTimestamp()));
 			viewHolder.textView_rating.setText((String.valueOf(review.getRating())).substring(0, 3));
@@ -98,11 +106,22 @@ public class MoreReviewsActivity extends AppCompatActivity {
 			((GradientDrawable)viewHolder.textView_rating.getBackground()).setStroke(10, color);
 			((GradientDrawable) viewHolder.textView_rating.getBackground()).setColor(color);
 			viewHolder.textView_comment.setText(review.getComment());
-			Glide.with(context).load(R.drawable.gio).into(viewHolder.profile_image);
+			Glide.with(context).load(review.getImgurl()).into(viewHolder.profile_image);
 			// Return the completed view to render on screen
 
 
 			return convertView;
 		}
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		// handle arrow click here
+		if (item.getItemId() == android.R.id.home)
+		{
+			finish(); // close this activity and return to preview activity (if there is any)
+		}
+
+		return super.onOptionsItemSelected(item);
 	}
 }

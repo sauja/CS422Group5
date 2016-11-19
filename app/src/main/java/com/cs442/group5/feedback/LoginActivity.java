@@ -143,7 +143,7 @@ context=this;
 					editor.commit();
 					User user=new User();
 
-					;
+
 
 					updateUser(firebaseUser.getUid(), FirebaseInstanceId.getInstance().getToken());
 

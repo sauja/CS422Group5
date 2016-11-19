@@ -120,4 +120,5 @@
 
     <string name="question_prompt">Please Enter Question</string>
     <string name="title_activity_more_reviews">MoreReviewsActivity</string>
+    <string name="refresh">Refresth</string>
 </resources>

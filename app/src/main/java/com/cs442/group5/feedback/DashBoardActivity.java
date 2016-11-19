@@ -261,6 +261,11 @@ public class DashBoardActivity extends AppCompatActivity
 		{
 			return true;
 		}
+		if (id == R.id.refresh)
+		{
+			getAllStores();
+			return true;
+		}
 
 		return super.onOptionsItemSelected(item);
 	}

@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -57,6 +58,15 @@ public class NewFormActivity extends AppCompatActivity
 		spinner_questionType = (Spinner) findViewById(R.id.spinner_questionType);
 		sf=context.getSharedPreferences("NEWFORM",MODE_PRIVATE);
 		editor = sf.edit();
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+
+		// add back arrow to toolbar
+		if (getSupportActionBar() != null)
+		{
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+			getSupportActionBar().setDisplayShowHomeEnabled(true);
+		}
 		btn_addOption=(Button)findViewById(R.id.btn_addOption);
 		editText_option=(EditText)findViewById(R.id.editText_option);
 		listView_options=(ListView) findViewById(R.id.listView_options);
