@@ -18,14 +18,7 @@
             android:id="@+id/myprofile"
             android:icon="@drawable/account_outline"
             android:title="My Profile"/>
-        <item
-            android:id="@+id/mychats"
-            android:icon="@android:drawable/stat_notify_chat"
-            android:title="My Chats"/>
-        <item
-            android:id="@+id/mytickets"
-            android:icon="@android:drawable/stat_notify_error"
-            android:title="My Tickets"/>
+
         <item
             android:id="@+id/logout"
             android:icon="@drawable/logout_variant"

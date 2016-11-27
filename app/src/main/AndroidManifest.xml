@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.CALL_PHONE"/>
 
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -40,16 +41,21 @@
         <activity
             android:name=".NewStoreActivity"
             android:label="New Store"
+
             android:theme="@style/AppTheme">
         </activity>
         <activity
             android:name=".TermsNConditions"
             android:label="@string/title_activity_terms_nconditions"
+            android:parentActivityName=".DashBoardActivity"
             android:theme="@style/AppTheme">
         </activity>
-        <activity android:name=".MyProfileActivity"/>
-        <activity android:name=".StoreActivity"/>
-        <activity android:name=".SignUpActivity"/>
+        <activity android:name=".MyProfileActivity"
+                  android:parentActivityName=".DashBoardActivity"/>
+        <activity android:name=".StoreActivity"
+                  android:parentActivityName=".DashBoardActivity"/>
+        <activity android:name=".SignUpActivity"
+                  android:parentActivityName=".LoginActivity"/>
         <activity android:name=".FormPreviewActivity"/>
 
         <meta-data
@@ -71,6 +77,7 @@
         <activity
             android:name=".MyStoreActivity"
             android:label="@string/title_activity_my_store"
+            android:parentActivityName=".DashBoardActivity"
             android:theme="@style/AppTheme">
         </activity>
         <activity
@@ -91,10 +98,33 @@
             android:theme="@style/AppTheme">
         </activity>
 
+
+
+        <activity
+            android:name=".IntroActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_intro"
+            android:parentActivityName=".LoginActivity"
+            android:theme="@style/Theme.Intro">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cs442.group5.feedback.LoginActivity"/>
+        </activity>
+        <activity android:name=".MyStorePageActivity"
+            android:parentActivityName=".MyStoreActivity">
+        </activity>
         <service
             android:name=".notification.MyFirebaseInstanceIDService"
             android:enabled="true"
             android:exported="true">
+        </service>
+        <service
+            android:name=".service.ReviewIntentService"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".service.StoreIntentService"
+            android:exported="false">
         </service>
     </application>
 

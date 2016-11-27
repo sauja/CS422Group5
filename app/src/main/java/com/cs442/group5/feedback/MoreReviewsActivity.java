@@ -1,6 +1,7 @@
 package com.cs442.group5.feedback;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -28,12 +29,14 @@ public class MoreReviewsActivity extends AppCompatActivity {
 	private static final String TAG=MoreReviewsActivity.class.getSimpleName();
 	Context context;
 	ArrayList<Review> reviewList;
+	String storeid="";
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_more_reviews);
 		context=this;
 		reviewList=new Gson().fromJson(getIntent().getExtras().get("reviewList").toString(),new TypeToken<ArrayList<Review>>() {}.getType());
+		storeid=getIntent().getExtras().get("storeid").toString();
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
@@ -52,6 +55,13 @@ public class MoreReviewsActivity extends AppCompatActivity {
 
 	}
 
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		Intent intent=new Intent(MoreReviewsActivity.this,StoreActivity.class);
+		intent.putExtra("storeid",storeid);
+		startActivity(intent);
+	}
 
 	private static class ViewHolder
 	{

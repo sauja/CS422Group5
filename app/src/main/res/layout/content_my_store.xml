@@ -24,7 +24,7 @@
         android:layout_marginStart="16dp"
         app:layout_constraintLeft_toLeftOf="parent"
         android:id="@+id/gridview_myStores"
-        android:numColumns="3"
+        android:numColumns="1"
         tools:listitem="@layout/store_list_item"
         android:choiceMode="singleChoice"/>
 </android.support.constraint.ConstraintLayout>

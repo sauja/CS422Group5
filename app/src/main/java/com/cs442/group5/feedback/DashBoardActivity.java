@@ -39,6 +39,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class DashBoardActivity extends AppCompatActivity
@@ -62,7 +63,11 @@ public class DashBoardActivity extends AppCompatActivity
 		myStores=new ArrayList<>();
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-
+		if (getSupportActionBar() != null)
+		{
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+			getSupportActionBar().setDisplayShowHomeEnabled(true);
+		}
 
 		gridview_myStores=(ListView) findViewById(R.id.gridview_dashboard);
 
@@ -182,6 +187,7 @@ public class DashBoardActivity extends AppCompatActivity
 			viewHolder.textView_address.setText(store.getAddress()+"\n"+store.getLocation());
 			viewHolder.textView_tags.setText(store.getTags());
 			viewHolder.textView_name.setText(store.getName());
+			Log.e(TAG, "getView: "+store.getImgurl() );
 			Glide.with(context).load(store.getImgurl()).into(viewHolder.imageView_img);
 			// Return the completed view to render on screen
 			convertView.setOnClickListener(new View.OnClickListener() {
@@ -244,7 +250,18 @@ public class DashBoardActivity extends AppCompatActivity
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.dash_board, menu);
+		getMenuInflater().inflate(R.menu.menu_dashboard, menu);
+
+		final SharedPreferences sf=getSharedPreferences("user",MODE_PRIVATE);
+		if(sf.contains("name")) {
+			TextView textView_userName=(TextView) findViewById(R.id.textView_userName);
+			textView_userName.setText(sf.getString("name",""));
+		}
+		if(sf.contains("image"))
+		{
+			CircleImageView imageView_profile=(CircleImageView) findViewById(R.id.imageView_profile);
+			Glide.with(context).load(sf.getString("image","")).into(imageView_profile);
+		}
 		return true;
 	}
 
@@ -261,9 +278,11 @@ public class DashBoardActivity extends AppCompatActivity
 		{
 			return true;
 		}
-		if (id == R.id.refresh)
+		if (id == R.id.action_refresh)
 		{
+			Log.e(TAG, "onOptionsItemSelected: Refresh");
 			getAllStores();
+
 			return true;
 		}
 

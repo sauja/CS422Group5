@@ -9,6 +9,8 @@ public class Review {
 	String comment;
 	float rating;
 	Timestamp timestamp;
+	String fullname;
+	String imgurl;
 	public int getId() {
 		return id;
 	}
@@ -44,6 +46,18 @@ public class Review {
 	}
 	public void setTimestamp(Timestamp timestamp) {
 		this.timestamp = timestamp;
+	}
+	public String getFullname() {
+		return fullname;
+	}
+	public void setFullname(String fullname) {
+		this.fullname = fullname;
+	}
+	public String getImgurl() {
+		return imgurl;
+	}
+	public void setImgurl(String imgurl) {
+		this.imgurl = imgurl;
 	}
 	
 

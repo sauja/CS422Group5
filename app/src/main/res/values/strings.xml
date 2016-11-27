@@ -105,8 +105,8 @@
     </string-array>
     <string name="title_activity_new_store">New Store</string>
     <string name="title_activity_test_map">Map</string>
-    <!--<string name="server_url">http://ec2-52-91-230-7.compute-1.amazonaws.com:8080/feedback_server/REST</string>-->
-    <string name="server_url">http://192.168.1.145:8080/feedback_server/REST</string>
+    <string name="server_url">http://ec2-52-91-230-7.compute-1.amazonaws.com:8080/feedback_server/REST</string>
+    <!--<string name="server_url">http://192.168.1.145:8080/feedback_server/REST</string>-->
     <string name="location_permission_denied">location_permission_denied</string>
     <string name="permission_required_toast">permission_required_toast</string>
     <string name="permission_rationale_location">permission_rationale_location</string>
@@ -120,5 +120,14 @@
 
     <string name="question_prompt">Please Enter Question</string>
     <string name="title_activity_more_reviews">MoreReviewsActivity</string>
-    <string name="refresh">Refresth</string>
+    <string name="refresh">Refresh</string>
+    <string name="title_activity_notification_chats">NotificationChatsActivity</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="title_activity_intro">IntroActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

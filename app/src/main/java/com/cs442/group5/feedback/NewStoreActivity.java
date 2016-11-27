@@ -1,6 +1,9 @@
 package com.cs442.group5.feedback;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -8,6 +11,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -19,12 +23,11 @@ import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.cs442.group5.feedback.model.Store;
+import com.cs442.group5.feedback.service.StoreIntentService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -41,11 +44,11 @@ import java.util.Map;
 
 public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCallback{
 
-	private static final String TAG=NewStoreActivity.class.getSimpleName();
+	private static final String TAG="NewStoreActivity";
 	Location mLastLocation;
 	LocationManager locationManager;
 	private GoogleMap mMap;
-	RequestQueue queue;
+
 	String id="";
 	private Context context = this;
 	private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -64,12 +67,7 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		queue = Volley.newRequestQueue(this);
 		setContentView(R.layout.activity_new_store);
-		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-		SmoothScrollMapFragment mapFragment = (SmoothScrollMapFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.map);
-		mapFragment.getMapAsync(this);
 		final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		// add back arrow to toolbar
@@ -78,6 +76,37 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 			getSupportActionBar().setDisplayShowHomeEnabled(true);
 		}
+		if(getIntent().getExtras()!=null&&getIntent().getExtras().containsKey("storeid"))
+		{
+			Intent intent=new Intent(NewStoreActivity.this,StoreIntentService.class);
+			intent.putExtra(StoreIntentService.GET_STORE,getIntent().getExtras().get("storeid").toString());
+			intent.putExtra("activity",TAG);
+			intent.setAction(StoreIntentService.GET_STORE);
+			startService(intent);
+			LocalBroadcastManager.getInstance(this).registerReceiver(
+					new BroadcastReceiver() {
+						@Override
+						public void onReceive(Context context, Intent intent) {
+							Store store=new Gson().fromJson(intent.getStringExtra(StoreIntentService.GET_STORE),new TypeToken<Store>() {}.getType());
+							updateFields(store);
+						}
+					}, new IntentFilter(StoreIntentService.GET_STORE)
+			);
+
+			toolbar.setTitle("Edit Store");
+
+		}
+		if(getIntent().getExtras()!=null&&getIntent().getExtras().containsKey("mode"))
+			isEditable=true;
+
+
+
+
+		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+		SmoothScrollMapFragment mapFragment = (SmoothScrollMapFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.map);
+		mapFragment.getMapAsync(this);
+
 		final NestedScrollView scrollView = (NestedScrollView) findViewById(R.id.content_new_store2);
 		editText_name = (EditText) findViewById(R.id.editText_name);
 		editText_address = (EditText) findViewById(R.id.editText_address);
@@ -103,21 +132,16 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 			public void onClick(View view) {
 				if(validateFields()) {
 					if(isEditable)
-					{}
+					{
+
+					}
 					else addStore();
 				}
 				else Toast.makeText(context, "Please enter all fields", Toast.LENGTH_SHORT).show();
 			}
 		});
 
-		if(getIntent().getExtras()!=null&&getIntent().getExtras().containsKey("storeid"))
-		{
-			getStore(getIntent().getExtras().get("storeid").toString());
-			toolbar.setTitle("Edit Store");
 
-		}
-		if(getIntent().getExtras()!=null&&getIntent().getExtras().containsKey("mode"))
-			isEditable=true;
 
 
 	}
@@ -183,7 +207,10 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 			public void onResponse(String response) {
 				Log.e(TAG, "onResponse: " );
 				if(response!=null&&response.length()>0)
+				{
 					Toast.makeText(context, "Store added successfully", Toast.LENGTH_LONG).show();
+					finish();
+				}
 			}
 		},new Response.ErrorListener() {
 			@Override
@@ -210,7 +237,7 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 				return parameters;
 			}
 		};
-		queue.add(postRequest);
+	//	queue.add(postRequest);
 
 	}
 	public void updateFields(Store store){
@@ -226,35 +253,7 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 			editText_website.setText(store.getWebsite());
 		}
 	}
-	public void getStore(final String id)
-	{
-		final String url=context.getString(R.string.server_url)+"/store/getStore";
 
-		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>(){
-			@Override
-			public void onResponse(String response) {
-				Gson gson=new Gson();
-
-				Store store=gson.fromJson(response,new TypeToken<Store>() {}.getType());
-				updateFields(store);
-
-			}
-		},new Response.ErrorListener() {
-			@Override
-			public void onErrorResponse(VolleyError error) {
-
-				Log.e("error",error.toString());
-			}
-		}) {
-			@Override
-			protected Map<String, String> getParams() throws AuthFailureError {
-				Map<String, String> parameters = new HashMap<String, String>();
-				parameters.put("id", id);
-				return parameters;
-			}
-		};
-		queue.add(postRequest);
-	}
 
 	private boolean validateFields()
 	{

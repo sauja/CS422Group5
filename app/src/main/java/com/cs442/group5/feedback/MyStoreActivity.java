@@ -100,7 +100,7 @@ private Context context;
 		@Override
 		public View getView(final int position, View convertView, ViewGroup parent) {
 			// Get the data item for this position
-			Store user = getItem(position);
+			Store adapterStore = getItem(position);
 			// Check if an existing view is being reused, otherwise inflate the view
 			ViewHolder viewHolder; // view lookup cache stored in tag
 			if (convertView == null) {
@@ -124,16 +124,17 @@ private Context context;
 			// Populate the data from the data object via the viewHolder object
 			// into the template view.
 			viewHolder.textView_rating.setText("  3.5  ");
-			viewHolder.textView_address.setText(user.getAddress());
+			viewHolder.textView_address.setText(adapterStore.getAddress());
 			viewHolder.textView_tags.setText("Random Stuff");
-			viewHolder.textView_name.setText(user.getName());
+			viewHolder.textView_name.setText(adapterStore.getName());
 			// Return the completed view to render on screen
 			convertView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
-					Intent intent=new Intent(context,NewStoreActivity.class);
+					Intent intent=new Intent(context,MyStorePageActivity.class);
 					Log.e(TAG, "onClick: "+myStores.get(position).getId() );
 					intent.putExtra("storeid",myStores.get(position).getId());
+					intent.putExtra("storename",myStores.get(position).getName());
 					intent.putExtra("mode","EDIT");
 					startActivity(intent);
 				}

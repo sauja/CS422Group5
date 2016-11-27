@@ -4,9 +4,11 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -59,7 +61,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseDatabase db = FirebaseDatabase.getInstance();
-
+private Context context;
     private final String TAG = "Auth: ";
 
     // UI references.
@@ -75,6 +77,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+        context=this;
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
@@ -384,19 +387,29 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
                         else {
 
                             User u = new User(mAuth.getCurrentUser().getUid(), fName.getText().toString(), lName.getText().toString(), userName.getText().toString(), mEmailView.getText().toString());
-                            u.setProfileImageURL("https://firebasestorage.googleapis.com/v0/b/feedback-87897.appspot.com/o/Photos%2F7364?alt=media&token=31c00bf0-a063-4d55-bff7-e16d9f2e9530");
+
+                            u.setProfileImageURL("https://firebasestorage.googleapis.com/v0/b/feedback-87897.appspot.com/o/StoreImages%2Fdefault.png?alt=media&token=5bdb457e-f082-4839-b116-055af718213c");
                             DatabaseReference ref = db.getReference();
                             ref.child("user").child(u.getUid()).setValue(u);
                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                    .setDisplayName(userName.getText().toString())
-                                    .setPhotoUri(Uri.parse("https://firebasestorage.googleapis.com/v0/b/feedback-87897.appspot.com/o/Photos%2F7364?alt=media&token=31c00bf0-a063-4d55-bff7-e16d9f2e9530"))
+                                    .setDisplayName(fName.getText().toString()+" "+lName.getText().toString())
+                                    .setPhotoUri(Uri.parse("https://firebasestorage.googleapis.com/v0/b/feedback-87897.appspot.com/o/StoreImages%2Fdefault.png?alt=media&token=5bdb457e-f082-4839-b116-055af718213c"))
                                     .build();
                             mAuth.getCurrentUser().updateProfile(profileUpdates).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     Log.d(TAG, "User data updated");
+	                                SharedPreferences sf=getSharedPreferences("user",MODE_PRIVATE);
+	                                SharedPreferences.Editor edit=sf.edit();
+	                                edit.putString("name",mAuth.getCurrentUser().getDisplayName());
+	                                edit.putString("image","https://firebasestorage.googleapis.com/v0/b/feedback-87897.appspot.com/o/StoreImages%2Fdefault.png?alt=media&token=5bdb457e-f082-4839-b116-055af718213c");
+
+	                                edit.putString("uid",mAuth.getCurrentUser().getUid());
+	                                edit.commit();
                                 }
                             });
+
+
                             Intent intent = new Intent(SignUpActivity.this, DashBoardActivity.class);
                             startActivity(intent);
 

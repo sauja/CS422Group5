@@ -17,4 +17,6 @@
     <color name="rating_4">#4AC800</color>
     <color name="rating_4.5">#22C300</color>
     <color name="rating_5">#00BF04</color>
+
+    <color name="black_overlay">#66000000</color>
 </resources>

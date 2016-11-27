@@ -351,6 +351,9 @@ public class StoreActivity extends AppCompatActivity {
 
 	public void getDirections(View view) {
 		Toast.makeText(context, "get directions", Toast.LENGTH_SHORT).show();
+		Intent intent=new Intent(StoreActivity.this,DirectionsActivity.class);
+		intent.putExtra("address",store.getAddress()+","+store.getLocation());
+		startActivity(intent);
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {

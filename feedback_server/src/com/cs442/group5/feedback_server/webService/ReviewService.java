@@ -16,6 +16,7 @@ import javax.ws.rs.Produces;
 
 import com.cs442.group5.feedback_server.dao.Database;
 import com.cs442.group5.feedback_server.dto.Review;
+import com.cs442.group5.feedback_server.dto.ReviewRatingCountChart;
 import com.cs442.group5.feedback_server.dto.Store;
 import com.google.gson.Gson;
 
@@ -92,6 +93,45 @@ public class ReviewService {
 		} catch (Exception e)
 		{
 			System.out.println("error "+e);
+			e.printStackTrace();
+		}
+		return feeds;
+	}
+
+	@POST
+	@Path("/getReviewRatingCountChart")
+	@Consumes("application/x-www-form-urlencoded")
+	@Produces("application/json")
+	public String getReviewChart( 
+			@FormParam("storeid") int storeid)
+	{
+		ArrayList<ReviewRatingCountChart> reviewList;
+		String feeds  = "false";
+		try 
+		{
+
+			Database database= new Database();
+			Connection connection = database.Get_Connection();
+			PreparedStatement ps = (connection).prepareStatement("SELECT storeid,rating,count(rating)as count,timestamp FROM feedback_db.review where storeid=? group by rating;");
+			ps.setInt(1, storeid);
+			ResultSet rs = ps.executeQuery();
+			reviewList=new ArrayList<ReviewRatingCountChart>();
+			while(rs.next())
+			{
+				Review review = new Review();
+			float rating=rs.getFloat("rating");
+			int count=rs.getInt("count");
+				reviewList.add(new ReviewRatingCountChart(rating, count));
+
+			}
+			Gson gson = new Gson();
+			System.out.println("ReviewRatingCountChart");
+			feeds = gson.toJson(reviewList);
+			return feeds;
+		} catch (Exception e)
+		{
+			System.out.println("error ");
+			e.printStackTrace();
 		}
 		return feeds;
 	}
