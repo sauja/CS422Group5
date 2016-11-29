@@ -187,8 +187,8 @@ public class DashBoardActivity extends AppCompatActivity
 			viewHolder.textView_address.setText(store.getAddress()+"\n"+store.getLocation());
 			viewHolder.textView_tags.setText(store.getTags());
 			viewHolder.textView_name.setText(store.getName());
-			Log.e(TAG, "getView: "+store.getImgurl() );
-			Glide.with(context).load(store.getImgurl()).into(viewHolder.imageView_img);
+			Log.e(TAG, "Tags: "+store.getTags() );
+			Glide.with(context).load(store.getImgurl()).centerCrop().into(viewHolder.imageView_img);
 			// Return the completed view to render on screen
 			convertView.setOnClickListener(new View.OnClickListener() {
 				@Override
@@ -260,7 +260,7 @@ public class DashBoardActivity extends AppCompatActivity
 		if(sf.contains("image"))
 		{
 			CircleImageView imageView_profile=(CircleImageView) findViewById(R.id.imageView_profile);
-			Glide.with(context).load(sf.getString("image","")).into(imageView_profile);
+			Glide.with(context).load(sf.getString("image","")).centerCrop().into(imageView_profile);
 		}
 		return true;
 	}

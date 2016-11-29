@@ -14,7 +14,7 @@ public class UserIntentService extends IntentService {
 	public UserIntentService(String name) {
 		super(name);
 	}
-
+	public static final String UPDATE_USER = "updateUser";
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		context=this;

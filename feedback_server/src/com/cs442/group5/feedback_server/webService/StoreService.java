@@ -13,6 +13,7 @@ import javax.ws.rs.Produces;
 import com.cs442.group5.feedback_server.dto.Store;
 import com.cs442.group5.feedback_server.model.StoreManager;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Path("/store")
 public class StoreService {
@@ -93,38 +94,47 @@ public class StoreService {
 	@Path("/addStore")
 	@Consumes("application/x-www-form-urlencoded")
 	@Produces("application/json")
-	public String addStore( 
-			@FormParam("name") String name,
-			@FormParam("address") String address,
-			@FormParam("location") String location,
-			@FormParam("zipcode") String zipcode,
-			@FormParam("phone_no") String phone_no,
-			@FormParam("emailid") String emailid,
-			@FormParam("website") String website,
-			@FormParam("gpsLat") String gpsLat,
-			@FormParam("gpsLng") String gpsLng,
-			@FormParam("ownerid") String ownerid)
+	public String addStore( @FormParam("store") String storeString)
 	{
 		String feeds  = "false";
 		try 
 		{
-			if(name!=null && name.length()>0)
+
+
+			StoreManager projectManager= new StoreManager();
+			Store store=new Gson().fromJson(storeString, new TypeToken<Store>() {}.getType());
+			if(store.getName()!=null && store.getName().length()>0)
 			{
-				StoreManager projectManager= new StoreManager();
-				Store store=new Store();
-				store.setName(name);
-				store.setAddress(address);
-				store.setLocation(location);
-				store.setZipcode(zipcode);
-				store.setEmailid(emailid);
-				store.setGpsLat(gpsLat);
-				store.setGpsLng(gpsLng);
-				store.setOwnerID(ownerid);
-				store.setWebsite(website);
-				store.setPhone_no(phone_no);
-				
-				
 				feeds = projectManager.addStore(store);
+				return feeds;
+			}
+			System.out.println("Name empty");
+			return "false";
+
+
+		} catch (Exception e)
+		{
+			System.out.println("error "+e);
+		}
+		return feeds;
+
+	}
+	@POST
+	@Path("/updateStore")
+	@Consumes("application/x-www-form-urlencoded")
+	@Produces("application/json")
+	public String updateStore( @FormParam("store") String storeString)
+	{
+		String feeds  = "false";
+		try 
+		{
+
+System.out.println("updateStore: "+storeString);
+			StoreManager projectManager= new StoreManager();
+			Store store=new Gson().fromJson(storeString, new TypeToken<Store>() {}.getType());
+			if(store.getName()!=null && store.getName().length()>0)
+			{
+				feeds = projectManager.updateStore(store);
 				return feeds;
 			}
 			System.out.println("Name empty");

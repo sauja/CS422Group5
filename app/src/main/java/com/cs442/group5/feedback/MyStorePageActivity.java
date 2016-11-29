@@ -190,7 +190,7 @@ context=this;
 
 		intent.putExtra("storeid",storeid);
 		intent.putExtra("mode","EDIT");
-		startActivity(intent);
+		startActivityForResult(intent,1);
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

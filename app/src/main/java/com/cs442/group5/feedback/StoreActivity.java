@@ -229,7 +229,7 @@ public class StoreActivity extends AppCompatActivity {
 		btn_add.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				SharedPreferences sharedpreferences = getSharedPreferences("firebaseUser", Context.MODE_PRIVATE);
+				SharedPreferences sharedpreferences = getSharedPreferences("user", Context.MODE_PRIVATE);
 				if (sharedpreferences.contains("uid")) {
 					RatingBar ratingBar = (RatingBar) openDialog.findViewById(R.id.ratingBar);
 					EditText editText_comment = (EditText) openDialog.findViewById(R.id.editText_comment);

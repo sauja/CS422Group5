@@ -1,14 +1,19 @@
 package com.cs442.group5.feedback;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -19,6 +24,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -26,13 +32,27 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.bumptech.glide.Glide;
 import com.cs442.group5.feedback.model.Store;
 import com.cs442.group5.feedback.service.StoreIntentService;
+import com.cs442.group5.feedback.utils.SmoothScrollMapFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnPausedListener;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -48,7 +68,8 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 	Location mLastLocation;
 	LocationManager locationManager;
 	private GoogleMap mMap;
-
+	private static final int GALLERY_INTENT = 2;
+	ProgressDialog nProg;
 	String id="";
 	private Context context = this;
 	private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -61,13 +82,19 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 	EditText editText_phone_no;
 	EditText editText_emailid;
 	EditText editText_website;
+	ImageView imageView_imgurl;
 	LatLng gps = new LatLng(0.0, 0.0);
 	String provider;
 	Location location;
+
+	private StorageReference mStorage;
+	FirebaseAuth mAuth;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_new_store);
+		store=new Store();
 		final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		// add back arrow to toolbar
@@ -76,6 +103,9 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 			getSupportActionBar().setDisplayShowHomeEnabled(true);
 		}
+		nProg = new ProgressDialog(this);
+		mAuth = FirebaseAuth.getInstance();
+		mStorage = FirebaseStorage.getInstance().getReference();
 		if(getIntent().getExtras()!=null&&getIntent().getExtras().containsKey("storeid"))
 		{
 			Intent intent=new Intent(NewStoreActivity.this,StoreIntentService.class);
@@ -87,7 +117,7 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 					new BroadcastReceiver() {
 						@Override
 						public void onReceive(Context context, Intent intent) {
-							Store store=new Gson().fromJson(intent.getStringExtra(StoreIntentService.GET_STORE),new TypeToken<Store>() {}.getType());
+							store=new Gson().fromJson(intent.getStringExtra(StoreIntentService.GET_STORE),new TypeToken<Store>() {}.getType());
 							updateFields(store);
 						}
 					}, new IntentFilter(StoreIntentService.GET_STORE)
@@ -96,9 +126,26 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 			toolbar.setTitle("Edit Store");
 
 		}
-		if(getIntent().getExtras()!=null&&getIntent().getExtras().containsKey("mode"))
-			isEditable=true;
+		if(getIntent().getExtras()!=null&&getIntent().getExtras().containsKey("mode")) {
+			isEditable = true;
 
+			LocalBroadcastManager.getInstance(this).registerReceiver(
+					new BroadcastReceiver() {
+						@Override
+						public void onReceive(Context context, Intent intent) {
+							//Store store=new Gson().fromJson(intent.getStringExtra(StoreIntentService.UPDATE_STORE),new TypeToken<Store>() {}.getType());
+							//updateFields(store);
+
+							Intent intent1=new Intent(context,MyStorePageActivity.class);
+							//	Log.e(TAG, "onClick: "+myStores.get(position).getId() );
+							intent.putExtra("storeid",store.getId());
+							intent.putExtra("storename",store.getName());
+							intent.putExtra("mode","EDIT");
+							startActivity(intent1);
+						}
+					}, new IntentFilter(StoreIntentService.UPDATE_STORE)
+			);
+		}
 
 
 
@@ -115,6 +162,7 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 		editText_phone_no = (EditText) findViewById(R.id.editText_phone_no);
 		editText_emailid = (EditText) findViewById(R.id.editText_emailid);
 		editText_website = (EditText) findViewById(R.id.editText_website);
+		imageView_imgurl=(ImageView)findViewById(R.id.imageView_imgurl);
 		Criteria criteria = new Criteria();
 
 		// Getting the name of the best provider
@@ -126,25 +174,55 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 				scrollView.requestDisallowInterceptTouchEvent(true);
 			}
 		});
-		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-		fab.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				if(validateFields()) {
-					if(isEditable)
-					{
-
-					}
-					else addStore();
-				}
-				else Toast.makeText(context, "Please enter all fields", Toast.LENGTH_SHORT).show();
-			}
-		});
-
-
-
 
 	}
+	public void onSaveButton(View view)
+	{
+		Toast.makeText(context, "on fab click", Toast.LENGTH_SHORT).show();
+		Log.e(TAG, "onSaveButton: " );
+		Log.e(TAG, "onClick: edit?:"+isEditable );
+		if(validateFields()) {
+			if(isEditable)
+			{
+				Log.e(TAG, "onClick: Update Store" );
+				store.setName(editText_name.getText().toString());
+				store.setAddress(editText_address.getText().toString());
+				store.setLocation(editText_Location.getText().toString());
+				store.setZipcode(editText_zipcode.getText().toString());
+				store.setPhone_no(editText_phone_no.getText().toString());
+				store.setEmailid(editText_emailid.getText().toString());
+				store.setWebsite(editText_website.getText().toString());
+				store.setGpsLat(String.valueOf(gps.latitude));
+				store.setGpsLng(String.valueOf(gps.longitude));
+				Log.e(TAG, "onClick: Update: "+new Gson().toJson(store));
+				Intent intent=new Intent(NewStoreActivity.this,StoreIntentService.class);
+				intent.putExtra(StoreIntentService.UPDATE_STORE,new Gson().toJson(store).toString());
+				intent.putExtra("activity",TAG);
+				intent.setAction(StoreIntentService.UPDATE_STORE);
+				startService(intent);
+			}
+			else {
+				Log.e(TAG, "onClick: Add Store" );
+				store.setName(editText_name.getText().toString());
+				store.setAddress(editText_address.getText().toString());
+				store.setLocation(editText_Location.getText().toString());
+				store.setZipcode(editText_zipcode.getText().toString());
+				store.setPhone_no(editText_phone_no.getText().toString());
+				store.setEmailid(editText_emailid.getText().toString());
+				store.setWebsite(editText_website.getText().toString());
+				store.setGpsLat(String.valueOf(gps.latitude));
+				store.setGpsLng(String.valueOf(gps.longitude));
+				store.setOwnerID("1");
+				if(validateFields())
+				{
+					addStore(store);
+				}
+
+			}
+		}
+		else Toast.makeText(context, "Please enter all fields", Toast.LENGTH_SHORT).show();
+	}
+
 	@Override
 	public void onMapReady(GoogleMap googleMap) {
 		mMap = googleMap;
@@ -198,7 +276,7 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 			mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
 		}
 	}
-	public void addStore()
+	public void addStore(final Store store)
 	{
 		final String url=context.getString(R.string.server_url)+"/store/addStore";
 		Log.e(TAG, "addStore: " );
@@ -224,20 +302,11 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 			@Override
 			protected Map<String, String> getParams() throws AuthFailureError {
 				Map<String, String> parameters = new HashMap<String, String>();
-				parameters.put("name", editText_name.getText().toString());
-				parameters.put("address", editText_address.getText().toString());
-				parameters.put("location", editText_Location.getText().toString());
-				parameters.put("zipcode", editText_zipcode.getText().toString());
-				parameters.put("phone_no", editText_phone_no.getText().toString());
-				parameters.put("emailid", editText_emailid.getText().toString());
-				parameters.put("website", editText_website.getText().toString());
-				parameters.put("gpsLat", String.valueOf(gps.latitude));
-				parameters.put("gpsLng", String.valueOf(gps.longitude));
-				parameters.put("ownerid", "1");
+				parameters.put("store", new Gson().toJson(store));
 				return parameters;
 			}
 		};
-	//	queue.add(postRequest);
+		//	queue.add(postRequest);
 
 	}
 	public void updateFields(Store store){
@@ -251,6 +320,7 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 			editText_phone_no.setText(store.getPhone_no());
 			editText_emailid.setText(store.getEmailid());
 			editText_website.setText(store.getWebsite());
+			try{Glide.with(context).load(store.getImgurl()).fitCenter().into(imageView_imgurl);}catch(Exception e){}
 		}
 	}
 
@@ -259,10 +329,16 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 	{
 		if(editText_emailid.length()<1||editText_address.length()<1||editText_Location.length()<1
 				||editText_name.length()<1||editText_website.length()<1||editText_zipcode.length()<1)
-		return false;
+			return false;
 		return true;
 	}
+	public void onChangeImage(View view)
+	{
+		Intent intent = new Intent(Intent.ACTION_PICK);
+		intent.setType("image/n");
+		startActivityForResult(intent, GALLERY_INTENT);
 
+	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
@@ -271,7 +347,43 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 		{
 			finish(); // close this activity and return to preview activity (if there is any)
 		}
-
 		return super.onOptionsItemSelected(item);
+	}
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == GALLERY_INTENT && resultCode == RESULT_OK) {
+			nProg.setMessage("Uploading....");
+			nProg.show();
+
+			Uri uri = data.getData();
+			StorageReference filepath = mStorage.child("StoreTemp/" + mAuth.getCurrentUser().getUid()+"_"+ SystemClock.currentThreadTimeMillis());
+			filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+				@Override
+				public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+					Log.e(TAG, "onSuccess: "+taskSnapshot.getDownloadUrl().toString() );
+					store.setImgurl(taskSnapshot.getDownloadUrl().toString());
+					Glide.with(context).load(taskSnapshot.getDownloadUrl()).into(imageView_imgurl);
+					nProg.dismiss();
+				}
+			}).addOnFailureListener(new OnFailureListener() {
+				@Override
+				public void onFailure(@NonNull Exception e) {
+
+
+				}
+			}).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+				@Override
+				public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+					double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+
+				}
+			}).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
+				@Override
+				public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
+
+				}
+			});
+
+		}
 	}
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <fragment
     android:id="@+id/map"
-    android:name="com.cs442.group5.feedback.SmoothScrollMapFragment"
+    android:name="com.cs442.group5.feedback.utils.SmoothScrollMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.cs442.group5.feedback.NewStoreActivity"

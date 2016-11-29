@@ -71,7 +71,7 @@ public class ReviewService {
 
 			Database database= new Database();
 			Connection connection = database.Get_Connection();
-			PreparedStatement ps = (connection).prepareStatement("SELECT * FROM feedback_db.review where storeid=? order by timestamp asc");
+			PreparedStatement ps = (connection).prepareStatement("SELECT r.idreview,r.uid,r.comment,r.rating,r.timestamp,u.fullname,u.imgurl FROM feedback_db.review as r,feedback_db.user as u where r.uid=u.uid and storeid=? order by timestamp asc");
 			ps.setInt(1, storeid);
 			ResultSet rs = ps.executeQuery();
 			reviewList=new ArrayList<Review>();
@@ -83,6 +83,8 @@ public class ReviewService {
 				review.setComment(rs.getString("comment"));
 				review.setRating(rs.getFloat("rating"));
 				review.setTimestamp(rs.getTimestamp("timestamp"));
+				review.setFullname(rs.getString("fullname"));
+				review.setImgurl(rs.getString("imgurl"));
 				reviewList.add(review);
 
 			}

@@ -6,6 +6,7 @@ package com.cs442.group5.feedback.model;
 
 public class User {
 
+	private long id;
 	private String uid;
 	private String fName;
 	private String lName;

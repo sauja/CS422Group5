@@ -2,6 +2,7 @@ package com.cs442.group5.feedback;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -25,7 +26,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.cs442.group5.feedback.model.Store;
+import com.cs442.group5.feedback.utils.RatingColor;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -123,10 +126,15 @@ private Context context;
 			}
 			// Populate the data from the data object via the viewHolder object
 			// into the template view.
-			viewHolder.textView_rating.setText("  3.5  ");
+
+			viewHolder.textView_rating.setText((String.valueOf(adapterStore.getRating())).substring(0,3));
+			int color= RatingColor.getRatingColor(adapterStore.getRating(),context);
+			((GradientDrawable)viewHolder.textView_rating.getBackground()).setStroke(10, color);
+			((GradientDrawable)viewHolder.textView_rating.getBackground()).setColor( color);
 			viewHolder.textView_address.setText(adapterStore.getAddress());
-			viewHolder.textView_tags.setText("Random Stuff");
+			viewHolder.textView_tags.setText(adapterStore.getTags());
 			viewHolder.textView_name.setText(adapterStore.getName());
+			Glide.with(context).load(adapterStore.getImgurl()).into(viewHolder.imageView_img);
 			// Return the completed view to render on screen
 			convertView.setOnClickListener(new View.OnClickListener() {
 				@Override

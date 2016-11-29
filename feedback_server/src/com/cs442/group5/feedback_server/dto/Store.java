@@ -12,6 +12,8 @@ public class Store {
 	String emailid;
 	String website;
 	float rating;
+	String imgurl;
+	String tags;
 	String ownerID;
 	public Store() {
 		// TODO Auto-generated constructor stub
@@ -103,6 +105,22 @@ public class Store {
 
 	public void setRating(float rating) {
 		this.rating = rating;
+	}
+
+	public String getImgurl() {
+		return imgurl;
+	}
+
+	public void setImgurl(String imgurl) {
+		this.imgurl = imgurl;
+	}
+
+	public String getTags() {
+		return tags;
+	}
+
+	public void setTags(String tags) {
+		this.tags = tags;
 	}
 
 }

@@ -49,11 +49,11 @@ public class MyProfileActivity extends AppCompatActivity {
 	DatabaseReference db = FirebaseDatabase.getInstance().getReference();
 	User u;
 	Context context;
-	private StorageReference mStorage;
+
 
 	ProgressDialog nProg;
 	public final String TAG = "MyProfileActivity";
-
+	private StorageReference mStorage;
 	FirebaseAuth mAuth;
 	private FirebaseAuth.AuthStateListener mAuthListener;
 

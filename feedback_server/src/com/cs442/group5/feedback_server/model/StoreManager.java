@@ -50,6 +50,19 @@ public class StoreManager {
 		}
 		return feeds;
 	}
+	public String updateStore(Store store)throws Exception {
+		String feeds = null;
+		try {
+			    Database database= new Database();
+			    Connection connection = database.Get_Connection();
+				StoreDAO project= new StoreDAO();
+				feeds=project.updateStore(connection,store);
+		
+		} catch (Exception e) {
+			throw e;
+		}
+		return feeds;
+	}
 	public ArrayList<Store> getMyStores(long ownerid)throws Exception {
 		ArrayList<Store> feeds = null;
 		try {

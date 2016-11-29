@@ -1,4 +1,4 @@
-package com.cs442.group5.feedback;
+package com.cs442.group5.feedback.utils;
 
 /**
  * <h1>Smooth Scroll for a map fragment inside a scrollview</h1>
