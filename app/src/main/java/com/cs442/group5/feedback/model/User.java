@@ -8,6 +8,9 @@ public class User {
 
 	private long id;
 	private String uid;
+	int userType;
+	String tokenid;
+	String displayName;
 	private String fName;
 	private String lName;
 	private String username;
@@ -82,5 +85,29 @@ public class User {
 				", username='" + username + '\'' +
 				", email='" + email + '\'' +
 				'}';
+	}
+	public String getTokenid() {
+		return tokenid;
+	}
+
+	public void setTokenid(String tokenid) {
+		this.tokenid = tokenid;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+
+	public int getUserType() {
+		return userType;
+	}
+
+	public void setUserType(int userType) {
+		this.userType = userType;
 	}
 }

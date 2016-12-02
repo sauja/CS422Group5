@@ -3,7 +3,7 @@
     <color name="colorPrimary">#ff5722</color>
     <color name="colorPrimaryDark">#e64a19</color>
     <color name="colorAccent">#536dfe</color>
-
+    <color name="loginColor">#e64a19</color>
 
     <!-- Colors for rating -->
     <color name="rating_0">#EC1303</color>

@@ -12,9 +12,11 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.cs442.group5.feedback.App;
+import com.cs442.group5.feedback.DashBoardActivity;
 import com.cs442.group5.feedback.MyStorePageActivity;
+import com.cs442.group5.feedback.NewStoreActivity;
 import com.cs442.group5.feedback.R;
+import com.cs442.group5.feedback.StoreActivity;
 import com.cs442.group5.feedback.model.Review;
 import com.cs442.group5.feedback.utils.Libs;
 import com.google.gson.Gson;
@@ -32,13 +34,13 @@ import java.util.Map;
  */
 public class ReviewIntentService extends IntentService {
 	private static final String TAG = "ReviewIntentService";
-Context context;
+	Context context;
 	// TODO: Rename actions, choose action names that describe tasks that this
 	// IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
 	public static final String GET_ALL_REVIEWS = "getAllReviews";
 	public static final String GET_REVIEW_FOR_CHART = "getReviewRatingCountChart";
 	public static final String ADD_REVIEW = "addReview";
-
+	String broadcastClass;
 	public ReviewIntentService() {
 		super("ReviewIntentService");
 	}
@@ -49,13 +51,17 @@ Context context;
 		context=this;
 		if (intent != null) {
 			final String action = intent.getAction();
+			broadcastClass=intent.getStringExtra("activity");
 			switch(action)
 			{
-				case GET_ALL_REVIEWS:
 
-					getAllReviews(intent.getIntExtra(GET_ALL_REVIEWS,-1));
+				case GET_ALL_REVIEWS:
+					broadcastClass=intent.getStringExtra("activity");
+					Log.e(TAG, "onHandleIntent: GET_ALL_REVIEWS storeid "+intent.getStringExtra(GET_ALL_REVIEWS) );
+					getAllReviews(intent.getStringExtra(GET_ALL_REVIEWS));
 					break;
 				case GET_REVIEW_FOR_CHART:
+					broadcastClass=intent.getStringExtra("activity");
 					/*final String param1 = intent.getStringExtra(EXTRA_PARAM1);
 					final String param2 = intent.getStringExtra(EXTRA_PARAM2);
 					handleActionBaz(param1, param2);*/
@@ -71,17 +77,15 @@ Context context;
 		}
 	}
 
-	public void getAllReviews(final long storeid) {
+	public void getAllReviews(final String storeid) {
 		final String url = context.getString(R.string.server_url) + "/review/getAllReviews";
 
+		Log.e(TAG, "getAllReviews: "+storeid );
 		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
 			@Override
 			public void onResponse(String response) {
-				Gson gson = new Gson();
-
-				//reviewList = gson.fromJson(response, new TypeToken<ArrayList<Review>>() {}.getType());
-				//updateReviewFields();
-
+				Log.e(TAG, "onResponse: getAllReviews "+storeid+" "+response );
+				sendStoreBroadcast(response,GET_ALL_REVIEWS);
 			}
 		}, new Response.ErrorListener() {
 			@Override
@@ -93,7 +97,7 @@ Context context;
 			@Override
 			protected Map<String, String> getParams() throws AuthFailureError {
 				Map<String, String> parameters = new HashMap<String, String>();
-				parameters.put("storeid", String.valueOf(storeid));
+				parameters.put("storeid", storeid);
 				return parameters;
 			}
 		};
@@ -102,12 +106,12 @@ Context context;
 	public void addReview(final Review r) {
 		Log.e(TAG, "addReview: " + r.getStoreid() + "\n"
 				+ r.getUid() + "\n" + r.getComment());
-		final String url = App.getContext().getString(R.string.server_url) + "/review/addReview";
+		final String url = Libs.getContext().getString(R.string.server_url) + "/review/addReview";
 
 		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
 			@Override
 			public void onResponse(String response) {
-				Toast.makeText(App.getContext(), "Added", Toast.LENGTH_SHORT).show();
+				Toast.makeText(Libs.getContext(), "Added", Toast.LENGTH_SHORT).show();
 				Log.e(TAG, "onResponse: " + response);
 			}
 		}, new Response.ErrorListener() {
@@ -131,33 +135,14 @@ Context context;
 	}
 	public void getReviewRatingCountChart(final long storeid) {
 
-		final String url = App.getContext().getString(R.string.server_url) + "/review/getReviewRatingCountChart";
+		final String url = Libs.getContext().getString(R.string.server_url) + "/review/getReviewRatingCountChart";
 
 		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
 			@Override
 			public void onResponse(String response) {
-				Toast.makeText(App.getContext(), "Added", Toast.LENGTH_SHORT).show();
+				Toast.makeText(Libs.getContext(), "Added", Toast.LENGTH_SHORT).show();
 				Log.e(TAG, "onResponse: " + response);
-
-
-				Intent broadcastIntent=new Intent(ReviewIntentService.this,MyStorePageActivity.class);
-				broadcastIntent.setAction(GET_REVIEW_FOR_CHART);
-				broadcastIntent.putExtra(GET_REVIEW_FOR_CHART,response);
-				LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
-				/*
-				*
-				*
-				*
-				*
-				*       ADD YOUR CHARTING FUNCTION HERE
-				*       Count is Y-Axis
-				*       Rating is X-Axis
-				*       Rating from 0-5 in 0.5 increments
-				*       data is available in  reviewRatingCountCharts arraylist
-				*
-				*
-				*
-				 */
+				sendStoreBroadcast(response,GET_REVIEW_FOR_CHART);
 			}
 		}, new Response.ErrorListener() {
 			@Override
@@ -175,5 +160,31 @@ Context context;
 		};
 		Libs.getQueueInstance().add(postRequest);
 	}
+	private void sendStoreBroadcast(String response,String action)
+	{
+		Intent broadcastIntent=null;
+		switch (broadcastClass)
+		{
+			case "MyStorePageActivity":
+				broadcastIntent=new Intent(ReviewIntentService.this,MyStorePageActivity.class);
+				break;
+			case "NewStoreActivity":
+				broadcastIntent=new Intent(ReviewIntentService.this,NewStoreActivity.class);
+				break;
+			case "DashBoardActivity":
+				broadcastIntent=new Intent(ReviewIntentService.this,DashBoardActivity.class);
+				break;
+			case "StoreActivity":
+				broadcastIntent=new Intent(ReviewIntentService.this,StoreActivity.class);
+				break;
+		}
+		Log.e(TAG, "sendStoreBroadcast: "+broadcastClass );
+		if(broadcastIntent!=null){
+			broadcastIntent.setAction(action);
+			broadcastIntent.putExtra(action,response);
+			LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
+		}
+	}
 }
+
 

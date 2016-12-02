@@ -12,14 +12,15 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.cs442.group5.feedback.DashBoardActivity;
 import com.cs442.group5.feedback.NewStoreActivity;
 import com.cs442.group5.feedback.R;
+import com.cs442.group5.feedback.StoreActivity;
 import com.cs442.group5.feedback.model.Store;
 import com.cs442.group5.feedback.utils.Libs;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,8 +32,11 @@ public class StoreIntentService extends IntentService {
 	private static final String TAG = "StoreIntentService";
 	Context context;
 	String broadcastClass=null;
+	public static final String ADD_STORE= "addStore";
 	public static final String GET_STORE = "getStore";
 	public static final String UPDATE_STORE = "updateStore";
+	public static final String GET_ALL_STORES = "getAllStores";
+	public static final String GET_BOOKMARKED_STORES = "getBookmarkedStores";
 	public StoreIntentService(String name) {
 		super(name);
 	}
@@ -45,41 +49,89 @@ public class StoreIntentService extends IntentService {
 		if (intent != null) {
 			Log.e(TAG, "onHandleIntent: Action:" +intent.getAction());
 			final String action = intent.getAction();
+			broadcastClass=intent.getStringExtra("activity");
 			switch(action)
 			{
+				case ADD_STORE:
+					Log.e(TAG, "onHandleIntent: ADD_STORE:" +intent.getStringExtra(ADD_STORE));
+					addStore(intent.getStringExtra(ADD_STORE));
+					break;
 				case GET_STORE:
-					broadcastClass=intent.getStringExtra("activity");
 					Log.e(TAG, "onHandleIntent: GET_STORE:" +intent.getStringExtra(GET_STORE));
 					getStore(intent.getStringExtra(GET_STORE));
 					break;
 				case UPDATE_STORE:
-					broadcastClass=intent.getStringExtra("activity");
 					Log.e(TAG, "onHandleIntent: UPDATE_STORE:" +intent.getStringExtra(UPDATE_STORE));
 					Store store=new Gson().fromJson(intent.getStringExtra(UPDATE_STORE),new TypeToken<Store>() {}.getType());
 					updateStore(store);
 					break;
+				case GET_ALL_STORES:
+					getAllStores();
+					break;
+				case GET_BOOKMARKED_STORES:
+					getBookmarkedStores();
+					break;
 			}
 		}
 	}
+	public void getAllStores()
+	{
+		final String url=context.getString(R.string.server_url)+"/store/getAllStores";
+		Log.e(TAG, "getMyStores: " );
+		StringRequest postRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>(){
+			@Override
+			public void onResponse(String response) {
+				Log.e(TAG, "onResponse: " );
+				sendStoreBroadcast(response,GET_ALL_STORES);
 
+			}
+		},new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				Log.e(TAG, "onErrorResponse: " );
+				if(error!=null)
+					Toast.makeText(context, "Network Error", Toast.LENGTH_LONG).show();
+				Log.e("error",error.toString());
+			}
+		});
+
+		Libs.getQueueInstance().add(postRequest);
+
+	}
+	public void getBookmarkedStores()
+	{
+		final String url=context.getString(R.string.server_url)+"/store/getBookmarkedStores";
+
+		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+			@Override
+			public void onResponse(String response) {
+				sendStoreBroadcast(response,UPDATE_STORE);
+
+			}
+		}, new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+
+				Log.e("error", error.toString());
+			}
+		}) {
+			@Override
+			protected Map<String, String> getParams() throws AuthFailureError {
+				Map<String, String> parameters = new HashMap<String, String>();
+				parameters.put("uid",Libs.getUser().getUid() );
+				return parameters;
+			}
+		};
+		Libs.getQueueInstance().add(postRequest);
+
+	}
 	public void updateStore(final Store store) {
 		final String url = context.getString(R.string.server_url) + "/store/updateStore";
 
 		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
 			@Override
 			public void onResponse(String response) {
-				Intent broadcastIntent=null;
-				switch (broadcastClass)
-				{
-					case "NewStoreActivity":
-						broadcastIntent=new Intent(StoreIntentService.this,NewStoreActivity.class);
-						broadcastIntent.setAction(UPDATE_STORE);
-						broadcastIntent.putExtra(UPDATE_STORE,response);
-						break;
-				}
-
-				if(broadcastIntent!=null)
-					LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
+				sendStoreBroadcast(response,UPDATE_STORE);
 
 			}
 		}, new Response.ErrorListener() {
@@ -105,19 +157,8 @@ public class StoreIntentService extends IntentService {
 		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
 			@Override
 			public void onResponse(String response) {
-				Intent broadcastIntent=null;
-				switch (broadcastClass)
-				{
-					case "NewStoreActivity":
-						broadcastIntent=new Intent(StoreIntentService.this,NewStoreActivity.class);
-						broadcastIntent.setAction(GET_STORE);
-						broadcastIntent.putExtra(GET_STORE,response);
-						break;
-				}
-
-				if(broadcastIntent!=null)
-					LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
-
+				sendStoreBroadcast(response,GET_STORE);
+				Log.e(TAG, "onResponse: "+response );
 			}
 		}, new Response.ErrorListener() {
 			@Override
@@ -135,7 +176,7 @@ public class StoreIntentService extends IntentService {
 		};
 		Libs.getQueueInstance().add(postRequest);
 	}
-	public void addStore(final Store store)
+	public void addStore(final String store)
 	{
 		final String url=context.getString(R.string.server_url)+"/store/addStore";
 		Log.e(TAG, "addStore: " );
@@ -160,11 +201,35 @@ public class StoreIntentService extends IntentService {
 			@Override
 			protected Map<String, String> getParams() throws AuthFailureError {
 				Map<String, String> parameters = new HashMap<String, String>();
-				parameters.put("store", new Gson().toJson(store));
+				parameters.put("store", store);
 				return parameters;
 			}
 		};
 			Libs.getQueueInstance().add(postRequest);
 
+	}
+
+	private void sendStoreBroadcast(String response,String action)
+	{
+		Intent broadcastIntent=null;
+		switch (broadcastClass)
+		{
+			case "NewStoreActivity":
+				broadcastIntent=new Intent(StoreIntentService.this,NewStoreActivity.class);
+				break;
+			case "DashBoardActivity":
+				broadcastIntent=new Intent(StoreIntentService.this,DashBoardActivity.class);
+				break;
+
+			case "StoreActivity":
+				broadcastIntent=new Intent(StoreIntentService.this,StoreActivity.class);
+				break;
+		}
+
+		if(broadcastIntent!=null){
+			broadcastIntent.setAction(action);
+			broadcastIntent.putExtra(action,response);
+			LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
+		}
 	}
 }

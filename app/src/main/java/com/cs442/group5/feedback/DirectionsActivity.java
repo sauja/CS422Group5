@@ -64,10 +64,7 @@ public class DirectionsActivity extends AppCompatActivity implements OnMapReadyC
 	//       mGoogleApiClient);
 	Geocoder geocoder = null;
 	String userLocation,locality;
-	/**
-	 * ATTENTION: This was auto-generated to implement the App Indexing API.
-	 * See https://g.co/AppIndexing/AndroidStudio for more information.
-	 */
+
 	private GoogleApiClient client;
 
 
@@ -93,6 +90,12 @@ public class DirectionsActivity extends AppCompatActivity implements OnMapReadyC
 			list = gc.getFromLocationName(location, 1);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+		if(list==null||list.size()==0)
+		{
+			Toast.makeText(this, "Incorrect Location", Toast.LENGTH_SHORT).show();
+			finish();
+			return;
 		}
 		Address address = list.get(0);
 		locality = address.getLocality();
@@ -142,8 +145,7 @@ public class DirectionsActivity extends AppCompatActivity implements OnMapReadyC
 		}
 
 
-		// ATTENTION: This was auto-generated to implement the App Indexing API.
-		// See https://g.co/AppIndexing/AndroidStudio for more information.
+
 		client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 	}
 
@@ -507,10 +509,7 @@ public class DirectionsActivity extends AppCompatActivity implements OnMapReadyC
 
 	}
 
-	/**
-	 * ATTENTION: This was auto-generated to implement the App Indexing API.
-	 * See https://g.co/AppIndexing/AndroidStudio for more information.
-	 */
+
 	public Action getIndexApiAction() {
 		Thing object = new Thing.Builder()
 				.setName("GoogleMaps Page") // TODO: Define a title for the content shown.
@@ -527,8 +526,7 @@ public class DirectionsActivity extends AppCompatActivity implements OnMapReadyC
 	public void onStart() {
 		super.onStart();
 
-		// ATTENTION: This was auto-generated to implement the App Indexing API.
-		// See https://g.co/AppIndexing/AndroidStudio for more information.
+
 		client.connect();
 		AppIndex.AppIndexApi.start(client, getIndexApiAction());
 	}
@@ -537,8 +535,7 @@ public class DirectionsActivity extends AppCompatActivity implements OnMapReadyC
 	public void onStop() {
 		super.onStop();
 
-		// ATTENTION: This was auto-generated to implement the App Indexing API.
-		// See https://g.co/AppIndexing/AndroidStudio for more information.
+
 		AppIndex.AppIndexApi.end(client, getIndexApiAction());
 		client.disconnect();
 	}

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.v4.widget.SwipeRefreshLayout
     android:id="@+id/content_dash_board"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.cs442.group5.feedback.DashBoardActivity"
-    tools:showIn="@layout/app_bar_dash_board">
+    tools:showIn="@layout/app_bar_dash_board"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_margin="16dp">
 
     <ListView
         android:layout_width="0dp"
@@ -27,4 +27,4 @@
 
         tools:listitem="@layout/store_list_item"
         android:choiceMode="singleChoice"/>
-</android.support.constraint.ConstraintLayout>
+</android.support.v4.widget.SwipeRefreshLayout>

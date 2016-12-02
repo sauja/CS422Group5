@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.cs442.group5.feedback">
+          package="com.cs442.group5.feedback"
+          android:installLocation="preferExternal">
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.READ_PROFILE"/>
@@ -12,7 +13,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
-        android:name=".App"
+        android:name=".utils.Libs"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -27,10 +28,19 @@
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <intent-filter android:label="@string/app_name">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs that begin with "http://recipe-app.com/recipe"
+                adb shell am start -a android.intent.action.VIEW \-d "http://ec2-52-91-230-7.compute-1.amazonaws.com/store/1" com.cs442.group5.feedback
+                 http://ec2-52-91-230-7.compute-1.amazonaws.com/recipe/1
+                 -->
+                <data android:scheme="http"
+                      android:host="@string/host"
+                      android:pathPrefix="@string/path" />
+            </intent-filter>
         </activity>
-        <activity
-            android:name=".LoginActivity"
-            android:noHistory="true"/>
         <activity
             android:name=".DashBoardActivity"
             android:label="@string/title_activity_dash_board"
@@ -41,7 +51,6 @@
         <activity
             android:name=".NewStoreActivity"
             android:label="New Store"
-
             android:theme="@style/AppTheme">
         </activity>
         <activity
@@ -50,12 +59,15 @@
             android:parentActivityName=".DashBoardActivity"
             android:theme="@style/AppTheme">
         </activity>
-        <activity android:name=".MyProfileActivity"
-                  android:parentActivityName=".DashBoardActivity"/>
-        <activity android:name=".StoreActivity"
-                  android:parentActivityName=".DashBoardActivity"/>
-        <activity android:name=".SignUpActivity"
-                  android:parentActivityName=".LoginActivity"/>
+        <activity
+            android:name=".MyProfileActivity"
+            android:parentActivityName=".DashBoardActivity"/>
+        <activity
+            android:name=".StoreActivity"
+            android:parentActivityName=".DashBoardActivity"/>
+        <activity
+            android:name=".SignUpActivity"
+            android:parentActivityName=".LoginActivity"/>
         <activity android:name=".FormPreviewActivity"/>
 
         <meta-data
@@ -97,9 +109,11 @@
             android:label="@string/title_activity_more_reviews"
             android:theme="@style/AppTheme">
         </activity>
-
-
-
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/title_activity_more_reviews"
+            android:theme="@style/AppTheme">
+        </activity>
         <activity
             android:name=".IntroActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -110,13 +124,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.cs442.group5.feedback.LoginActivity"/>
         </activity>
-        <activity android:name=".MyStorePageActivity"
+        <activity
+            android:name=".MyStorePageActivity"
             android:parentActivityName=".MyStoreActivity">
         </activity>
+
         <service
             android:name=".notification.MyFirebaseInstanceIDService"
             android:enabled="true"
             android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
         </service>
         <service
             android:name=".service.ReviewIntentService"
@@ -126,6 +145,16 @@
             android:name=".service.StoreIntentService"
             android:exported="false">
         </service>
+        <service
+            android:name=".service.UserIntentService"
+            android:exported="false">
+        </service>
+
+        <activity
+            android:name=".BookMarkActivity"
+            android:label="@string/title_activity_book_mark"
+            android:theme="@style/AppTheme">
+        </activity>
     </application>
 
 </manifest>

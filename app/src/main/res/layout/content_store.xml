@@ -83,8 +83,6 @@
             android:onClick="onCallButton"/>
 
 
-
-
     </android.support.constraint.ConstraintLayout>
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"

@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -14,7 +13,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.NestedScrollView;
@@ -27,27 +25,19 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.bumptech.glide.Glide;
 import com.cs442.group5.feedback.model.Store;
 import com.cs442.group5.feedback.service.StoreIntentService;
+import com.cs442.group5.feedback.utils.Libs;
 import com.cs442.group5.feedback.utils.SmoothScrollMapFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnPausedListener;
 import com.google.firebase.storage.OnProgressListener;
@@ -55,9 +45,6 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 
@@ -122,13 +109,6 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 						}
 					}, new IntentFilter(StoreIntentService.GET_STORE)
 			);
-
-			toolbar.setTitle("Edit Store");
-
-		}
-		if(getIntent().getExtras()!=null&&getIntent().getExtras().containsKey("mode")) {
-			isEditable = true;
-
 			LocalBroadcastManager.getInstance(this).registerReceiver(
 					new BroadcastReceiver() {
 						@Override
@@ -136,16 +116,20 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 							//Store store=new Gson().fromJson(intent.getStringExtra(StoreIntentService.UPDATE_STORE),new TypeToken<Store>() {}.getType());
 							//updateFields(store);
 
-							Intent intent1=new Intent(context,MyStorePageActivity.class);
-							//	Log.e(TAG, "onClick: "+myStores.get(position).getId() );
+							Intent intent1=new Intent(NewStoreActivity.this,MyStorePageActivity.class);
+								Log.e(TAG, "go back: "+store.getId()+" "+ store.getName());
 							intent.putExtra("storeid",store.getId());
 							intent.putExtra("storename",store.getName());
 							intent.putExtra("mode","EDIT");
-							startActivity(intent1);
+							//startActivity(intent1);
+							finish();
 						}
 					}, new IntentFilter(StoreIntentService.UPDATE_STORE)
 			);
+			toolbar.setTitle("Edit Store");
+			isEditable = true;
 		}
+
 
 
 
@@ -196,7 +180,7 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 				store.setGpsLng(String.valueOf(gps.longitude));
 				Log.e(TAG, "onClick: Update: "+new Gson().toJson(store));
 				Intent intent=new Intent(NewStoreActivity.this,StoreIntentService.class);
-				intent.putExtra(StoreIntentService.UPDATE_STORE,new Gson().toJson(store).toString());
+				intent.putExtra(StoreIntentService.UPDATE_STORE,new Gson().toJson(store));
 				intent.putExtra("activity",TAG);
 				intent.setAction(StoreIntentService.UPDATE_STORE);
 				startService(intent);
@@ -212,11 +196,14 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 				store.setWebsite(editText_website.getText().toString());
 				store.setGpsLat(String.valueOf(gps.latitude));
 				store.setGpsLng(String.valueOf(gps.longitude));
-				store.setOwnerID("1");
-				if(validateFields())
-				{
-					addStore(store);
-				}
+				store.setOwnerID(Libs.getUser().getUid());
+				Intent intent=new Intent(NewStoreActivity.this,StoreIntentService.class);
+				intent.setAction(StoreIntentService.ADD_STORE);
+				intent.putExtra(StoreIntentService.ADD_STORE,new Gson().toJson(store));
+				intent.putExtra("activity",TAG);
+				startService(intent);
+
+
 
 			}
 		}
@@ -276,39 +263,7 @@ public class NewStoreActivity extends AppCompatActivity implements OnMapReadyCal
 			mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
 		}
 	}
-	public void addStore(final Store store)
-	{
-		final String url=context.getString(R.string.server_url)+"/store/addStore";
-		Log.e(TAG, "addStore: " );
-		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>(){
-			@Override
-			public void onResponse(String response) {
-				Log.e(TAG, "onResponse: " );
-				if(response!=null&&response.length()>0)
-				{
-					Toast.makeText(context, "Store added successfully", Toast.LENGTH_LONG).show();
-					finish();
-				}
-			}
-		},new Response.ErrorListener() {
-			@Override
-			public void onErrorResponse(VolleyError error) {
-				Log.e(TAG, "onErrorResponse: " );
-				if(error!=null)
-					Toast.makeText(context, "Store not added!", Toast.LENGTH_LONG).show();
-				Log.e("error",error.toString());
-			}
-		}) {
-			@Override
-			protected Map<String, String> getParams() throws AuthFailureError {
-				Map<String, String> parameters = new HashMap<String, String>();
-				parameters.put("store", new Gson().toJson(store));
-				return parameters;
-			}
-		};
-		//	queue.add(postRequest);
 
-	}
 	public void updateFields(Store store){
 		if(store!=null&&store.getName().length()>0)
 		{

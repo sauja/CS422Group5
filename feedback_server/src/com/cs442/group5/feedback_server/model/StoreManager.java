@@ -31,6 +31,7 @@ public class StoreManager {
 			    Connection connection = database.Get_Connection();
 			    StoreDAO project= new StoreDAO();
 				feeds=project.getStore(connection,(long) id);
+				System.out.println("GETSTORE\n");
 		
 		} catch (Exception e) {
 			throw e;
@@ -63,7 +64,7 @@ public class StoreManager {
 		}
 		return feeds;
 	}
-	public ArrayList<Store> getMyStores(long ownerid)throws Exception {
+	public ArrayList<Store> getMyStores(String ownerid)throws Exception {
 		ArrayList<Store> feeds = null;
 		try {
 			    Database database= new Database();
@@ -73,6 +74,20 @@ public class StoreManager {
 		
 		} catch (Exception e) {
 			throw e;
+		}
+		return feeds;
+	}
+
+	public ArrayList<Store> getBookmarkedStores(long ownerid) {
+		ArrayList<Store> feeds = null;
+		try {
+			    Database database= new Database();
+			    Connection connection = database.Get_Connection();
+			    StoreDAO project= new StoreDAO();
+				feeds=project.getBookmarkedStores(connection, ownerid);
+		
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return feeds;
 	}

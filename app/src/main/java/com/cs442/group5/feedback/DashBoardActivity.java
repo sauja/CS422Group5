@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -51,6 +52,7 @@ public class DashBoardActivity extends AppCompatActivity
 	ArrayList<Store> myStores;
 	ListView gridview_myStores;
 	MyStoreDashboardArrayAdapter arrayAdapter;
+	SwipeRefreshLayout mSwipeRefreshLayout;
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -84,6 +86,14 @@ public class DashBoardActivity extends AppCompatActivity
 
 		Log.e(TAG, "onCreate: " );
 
+		mSwipeRefreshLayout=(SwipeRefreshLayout) findViewById(R.id.content_dash_board);
+		mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				// Refresh items
+				getAllStores();
+			}
+		});
 
 
 
@@ -217,6 +227,7 @@ public class DashBoardActivity extends AppCompatActivity
 					arrayAdapter=new MyStoreDashboardArrayAdapter(context,myStores);
 					gridview_myStores.setAdapter(arrayAdapter);
 					arrayAdapter.notifyDataSetChanged();
+					mSwipeRefreshLayout.setRefreshing(false);
 				}
 			}
 		},new Response.ErrorListener() {
@@ -252,16 +263,15 @@ public class DashBoardActivity extends AppCompatActivity
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.menu_dashboard, menu);
 
-		final SharedPreferences sf=getSharedPreferences("user",MODE_PRIVATE);
-		if(sf.contains("name")) {
+
 			TextView textView_userName=(TextView) findViewById(R.id.textView_userName);
-			textView_userName.setText(sf.getString("name",""));
-		}
-		if(sf.contains("image"))
-		{
+			textView_userName.setText(Libs.getUser().getDisplayName());
 			CircleImageView imageView_profile=(CircleImageView) findViewById(R.id.imageView_profile);
-			Glide.with(context).load(sf.getString("image","")).centerCrop().into(imageView_profile);
-		}
+			Glide.with(context).load(Libs.getUser().getProfileImageURL()).centerCrop().into(imageView_profile);
+			TextView textView_email=(TextView)findViewById(R.id.textView_email);
+			textView_email.setText(Libs.getUser().getEmail());
+
+
 		return true;
 	}
 
@@ -307,8 +317,12 @@ public class DashBoardActivity extends AppCompatActivity
 			case R.id.dashboard:
 				break;
 			case R.id.logout:
-				FirebaseAuth mAuth= Libs.getFirebaseAuth();
+				FirebaseAuth mAuth= FirebaseAuth.getInstance();
 				mAuth.signOut();
+				SharedPreferences sf=getSharedPreferences("user",MODE_PRIVATE);
+				SharedPreferences.Editor edit=sf.edit();
+				edit.remove("user");
+				edit.commit();
 				intent = new Intent(this, LoginActivity.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);

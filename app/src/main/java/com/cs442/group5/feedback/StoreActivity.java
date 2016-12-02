@@ -2,24 +2,33 @@ package com.cs442.group5.feedback;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -38,9 +47,14 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.cs442.group5.feedback.model.Review;
 import com.cs442.group5.feedback.model.Store;
+import com.cs442.group5.feedback.service.ReviewIntentService;
+import com.cs442.group5.feedback.service.StoreIntentService;
 import com.cs442.group5.feedback.utils.CustomSwipeAdapter;
+import com.cs442.group5.feedback.utils.Libs;
 import com.cs442.group5.feedback.utils.RatingColor;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -58,7 +72,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mypopsy.maps.StaticMap;
 
-import java.net.MalformedURLException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,6 +94,8 @@ public class StoreActivity extends AppCompatActivity {
 	ProgressDialog nProg;
 	RequestQueue queue;
 	Store store;
+	private ShareActionProvider miShareAction;
+
 	ArrayList<Review> reviewList;
 	private static final int GALLERY_INTENT = 2;
 	CollapsingToolbarLayout collapsingToolbar;
@@ -100,7 +118,7 @@ public class StoreActivity extends AppCompatActivity {
 
 		viewPager = (ViewPager) findViewById(R.id.viewPager_storeImages);
 		DatabaseReference df;
-		String storeid = "" + getIntent().getExtras().get("storeid");
+		final String storeid =getIntent().getExtras().get("storeid").toString();
 		df = FirebaseDatabase.getInstance().getReference("StoreImages/" + storeid);
 		df.addListenerForSingleValueEvent(new ValueEventListener() {
 			@Override
@@ -118,37 +136,68 @@ public class StoreActivity extends AppCompatActivity {
 			public void onCancelled(DatabaseError databaseError) {
 			}
 		});
-		getStore(storeid);
-		getAllReviews(Integer.parseInt(storeid));
+
+
+		Intent intent=new Intent(StoreActivity.this,StoreIntentService.class);
+		intent.putExtra(StoreIntentService.GET_STORE,storeid);
+		intent.putExtra("activity",TAG);
+		intent.setAction(StoreIntentService.GET_STORE);
+		startService(intent);
+		LocalBroadcastManager.getInstance(this).registerReceiver(
+				new BroadcastReceiver() {
+					@Override
+					public void onReceive(Context context, Intent intent) {
+						store=new Gson().fromJson(intent.getStringExtra(StoreIntentService.GET_STORE),new TypeToken<Store>() {}.getType());
+						updateFields(store);
+
+					}
+				}, new IntentFilter(StoreIntentService.GET_STORE)
+		);
+		Log.e(TAG, "onCreate: 123456789 "+storeid);
+
+
+		intent=new Intent(StoreActivity.this,ReviewIntentService.class);
+						intent.putExtra(ReviewIntentService.GET_ALL_REVIEWS,storeid);
+						intent.setAction(ReviewIntentService.GET_ALL_REVIEWS);
+						intent.putExtra("activity",TAG);
+						startService(intent);
+		LocalBroadcastManager.getInstance(this).registerReceiver(
+				new BroadcastReceiver() {
+					@Override
+					public void onReceive(Context context, Intent intent) {
+						reviewList=new Gson().fromJson(intent.getStringExtra(ReviewIntentService.GET_ALL_REVIEWS),new TypeToken<ArrayList<Review>>() {}.getType());
+						updateReviewFields();
+					}
+				}, new IntentFilter(ReviewIntentService.GET_ALL_REVIEWS)
+		);
+
 
 		mdatabse = FirebaseDatabase.getInstance().getReference();
 		mStorage = FirebaseStorage.getInstance().getReference();
 		nProg = new ProgressDialog(this);
 
 	}
-
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// handle arrow click here
-		if (item.getItemId() == android.R.id.home) {
-			finish(); // close this activity and return to preview activity (if there is any)
-		}
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.menu_store, menu);
+		MenuItem item = menu.findItem(R.id.action_share);
+		// Fetch reference to the share action provider
+		miShareAction = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
 
-		return super.onOptionsItemSelected(item);
+		return true;
 	}
 
-	public void getAllReviews(final int id) {
+	public void getAllReviews(final long storeid) {
 		final String url = context.getString(R.string.server_url) + "/review/getAllReviews";
 
+		Log.e(TAG, "getAllReviews: "+storeid );
 		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
 			@Override
 			public void onResponse(String response) {
-				Gson gson = new Gson();
-
-				reviewList = gson.fromJson(response, new TypeToken<ArrayList<Review>>() {
-				}.getType());
+				Log.e(TAG, "onResponse: getAllReviews "+storeid+" "+response );
+				reviewList=new Gson().fromJson(response,new TypeToken<ArrayList<Review>>() {}.getType());
 				updateReviewFields();
-
 			}
 		}, new Response.ErrorListener() {
 			@Override
@@ -160,14 +209,79 @@ public class StoreActivity extends AppCompatActivity {
 			@Override
 			protected Map<String, String> getParams() throws AuthFailureError {
 				Map<String, String> parameters = new HashMap<String, String>();
-				parameters.put("storeid", String.valueOf(id));
+				parameters.put("storeid", String.valueOf(storeid));
 				return parameters;
 			}
 		};
-		queue.add(postRequest);
+		Libs.getQueueInstance().add(postRequest);
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// handle arrow click here
+		if (item.getItemId() == android.R.id.home) {
+			finish(); // close this activity and return to preview activity (if there is any)
+		}
+		switch (item.getItemId())
+		{
+			case android.R.id.home:
+				finish();
+				break;
+			case R.id.action_bookmark:
+				break;
+			case R.id.action_share:
+				if(store!=null){
+					final ImageView imageView=new ImageView(this);
+					Glide.with(context).load(store.getImgurl()).asBitmap().thumbnail(0.1f).into(new SimpleTarget<Bitmap>(100,100) {
+						@Override
+						public void onResourceReady(Bitmap resource, GlideAnimation glideAnimation) {
+							imageView.setImageBitmap(resource); // Possibly runOnUiThread()
+							Intent shareIntent = new Intent();
+							shareIntent.setAction(Intent.ACTION_SEND);
+							String uri="http://"+getString(R.string.host)+getString(R.string.path)+"/"+store.getId();
+							shareIntent.putExtra(Intent.EXTRA_TEXT, uri);
+
+							Uri bmpUri = getLocalBitmapUri(imageView);
+							shareIntent.putExtra(Intent.EXTRA_STREAM, bmpUri);
+							shareIntent.setType("image/*");
+							shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+							startActivity(Intent.createChooser(shareIntent, "Send"));
+						}
+					});
+				}
+		break;
 	}
 
+	return super.onOptionsItemSelected(item);
+}
+
+	public Uri getLocalBitmapUri(ImageView imageView) {
+		// Extract Bitmap from ImageView drawable
+		Drawable drawable = imageView.getDrawable();
+		Bitmap bmp = null;
+		if (drawable instanceof BitmapDrawable){
+			bmp = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+		} else {
+			return null;
+		}
+		// Store image to default external storage directory
+		Uri bmpUri = null;
+		try {
+			// Use methods on Context to access package-specific directories on external storage.
+			// This way, you don't need to request external read/write permission.
+			// See https://youtu.be/5xVh-7ywKpE?t=25m25s
+			File file =  new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_" + System.currentTimeMillis() + ".png");
+			FileOutputStream out = new FileOutputStream(file);
+			bmp.compress(Bitmap.CompressFormat.PNG, 90, out);
+			out.close();
+			// **Warning:** This will fail for API > 24, use a FileProvider as shown below instead.
+			bmpUri = Uri.fromFile(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return bmpUri;
+	}
 	private void updateReviewFields() {
+		Log.e(TAG, "updateReviewFields: " );
 		int j = 2;
 		LinearLayout item = (LinearLayout) findViewById(R.id.ll_store);
 		if (reviewList.size() < 2)
@@ -187,7 +301,7 @@ public class StoreActivity extends AppCompatActivity {
 			((GradientDrawable) textView_rating.getBackground()).setStroke(10, color);
 			((GradientDrawable) textView_rating.getBackground()).setColor(color);
 			textView_comment.setText(r.getComment());
-			Glide.with(context).load(r.getImgurl()).into(profile_image);
+			Glide.with(Libs.getContext()).load(r.getImgurl()).into(profile_image);
 
 			item.addView(child);
 		}
@@ -229,19 +343,18 @@ public class StoreActivity extends AppCompatActivity {
 		btn_add.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				SharedPreferences sharedpreferences = getSharedPreferences("user", Context.MODE_PRIVATE);
-				if (sharedpreferences.contains("uid")) {
-					RatingBar ratingBar = (RatingBar) openDialog.findViewById(R.id.ratingBar);
-					EditText editText_comment = (EditText) openDialog.findViewById(R.id.editText_comment);
-					Review r = new Review();
-					r.setComment(editText_comment.getText().toString());
-					r.setStoreid(store.getId());
-					r.setRating(ratingBar.getRating());
 
-					r.setUid(sharedpreferences.getString("uid", ""));
-					addReview(r);
-				} else
-					Toast.makeText(context, "Please login again", Toast.LENGTH_SHORT).show();
+
+				RatingBar ratingBar = (RatingBar) openDialog.findViewById(R.id.ratingBar);
+				EditText editText_comment = (EditText) openDialog.findViewById(R.id.editText_comment);
+				Review r = new Review();
+				r.setComment(editText_comment.getText().toString());
+				r.setStoreid(store.getId());
+				r.setRating(ratingBar.getRating());
+
+				r.setUid(Libs.getUser().getUid());
+				addReview(r);
+
 				openDialog.dismiss();
 			}
 		});
@@ -286,33 +399,7 @@ public class StoreActivity extends AppCompatActivity {
 		startActivityForResult(intent, GALLERY_INTENT);
 	}
 
-	public void getStore(final String id) {
-		final String url = context.getString(R.string.server_url) + "/store/getStore";
 
-		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-			@Override
-			public void onResponse(String response) {
-				Gson gson = new Gson();
-				Store store = gson.fromJson(response, new TypeToken<Store>() {
-				}.getType());
-				updateFields(store);
-			}
-		}, new Response.ErrorListener() {
-			@Override
-			public void onErrorResponse(VolleyError error) {
-
-				Log.e("error", error.toString());
-			}
-		}) {
-			@Override
-			protected Map<String, String> getParams() throws AuthFailureError {
-				Map<String, String> parameters = new HashMap<String, String>();
-				parameters.put("id", id);
-				return parameters;
-			}
-		};
-		queue.add(postRequest);
-	}
 
 	public void updateFields(Store store) {
 		if (store != null && store.getName().length() > 0) {
@@ -342,7 +429,7 @@ public class StoreActivity extends AppCompatActivity {
 				try {
 					Glide.with(this).load(map.toURL())
 							.into(imageView_staticMap);
-				} catch (MalformedURLException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}

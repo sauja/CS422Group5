@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 
 <ScrollView
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -86,7 +85,7 @@
                     android:layout_marginTop="16dp"
                     android:text="Log in"
                     android:textStyle="bold"
-                    android:onClick="onEmailLogin"/>
+                    android:onClick="onEmailLogin" android:background="@drawable/tw__login_btn"/>
 
                 <TextView
                     android:text="Forgot your password?"
@@ -113,17 +112,17 @@
                         tools:layout_gravity="center_horizontal"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
-                        />
+                    />
 
                     <com.google.android.gms.common.SignInButton
-                        android:id="@+id/btn_googleLogin"
+                        android:id="@+id/sign_in_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         tools:layout_gravity="fill_horizontal"
                         android:layout_alignParentTop="true"
                         android:layout_alignParentEnd="true"
-                        />
+                        android:text="Google"/>
                 </RelativeLayout>
             </LinearLayout>
         </ScrollView>

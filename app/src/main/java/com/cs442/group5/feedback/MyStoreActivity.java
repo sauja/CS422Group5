@@ -28,6 +28,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.cs442.group5.feedback.model.Store;
+import com.cs442.group5.feedback.utils.Libs;
 import com.cs442.group5.feedback.utils.RatingColor;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -178,7 +179,7 @@ private Context context;
 			@Override
 			protected Map<String, String> getParams() throws AuthFailureError {
 				Map<String, String> parameters = new HashMap<String, String>();
-				parameters.put("ownerid", "1");
+				parameters.put("ownerid", Libs.getUser().getUid());
 				return parameters;
 			}
 		};

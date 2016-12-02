@@ -69,7 +69,7 @@ public class StoreService {
 	@Path("/getMyStores")
 	@Consumes("application/x-www-form-urlencoded")
 	@Produces("application/json")
-	public String getMyStores( @FormParam("ownerid") long ownerid ) {
+	public String getMyStores( @FormParam("ownerid") String ownerid ) {
 		String feeds  = null;
 		try 
 		{
@@ -140,6 +140,30 @@ System.out.println("updateStore: "+storeString);
 			System.out.println("Name empty");
 			return "false";
 
+
+		} catch (Exception e)
+		{
+			System.out.println("error "+e);
+		}
+		return feeds;
+
+	}
+	@POST
+	@Path("/getBookmarkedStores")
+	@Consumes("application/x-www-form-urlencoded")
+	@Produces("application/json")
+	public String getBookmarkedStores( @FormParam("ownerid") long ownerid ) {
+		String feeds  = null;
+		try 
+		{
+			System.out.println("getBookmarkedStores");
+			ArrayList<Store> feedData = null;
+			StoreManager projectManager= new StoreManager();
+			feedData = projectManager.getBookmarkedStores(ownerid);
+			//StringBuffer sb = new StringBuffer();
+			Gson gson = new Gson();
+			System.out.println(gson.toJson(feedData));
+			feeds = gson.toJson(feedData);
 
 		} catch (Exception e)
 		{

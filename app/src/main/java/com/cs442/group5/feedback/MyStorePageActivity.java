@@ -65,6 +65,7 @@ context=this;
 		Intent intent=new Intent(MyStorePageActivity.this,ReviewIntentService.class);
 		intent.putExtra(ReviewIntentService.GET_REVIEW_FOR_CHART,storeid);
 		intent.setAction(ReviewIntentService.GET_REVIEW_FOR_CHART);
+		intent.putExtra("activity",TAG);
 		startService(intent);
 		LocalBroadcastManager.getInstance(this).registerReceiver(
 				new BroadcastReceiver() {
@@ -79,11 +80,12 @@ context=this;
 	{
 		chart = (BarChart) findViewById(R.id.chart1);
 		int i=0, ratingI=0;
-
+		Log.e(TAG, "buildChart: "+response );
 		ArrayList<BarDataSet> dataSets = null;
 		ArrayList<BarEntry> valueSet1 = new ArrayList<>();
 		BarEntry v1e1;
 		ArrayList<ReviewRatingCountChart> reviewRatingCountCharts=new Gson().fromJson(response,new TypeToken<ArrayList<ReviewRatingCountChart>>() {}.getType());
+		Log.e(TAG, "buildChart: "+reviewRatingCountCharts.size() );
 		for (ReviewRatingCountChart r:reviewRatingCountCharts)
 		{
 			count = r.getCount();
