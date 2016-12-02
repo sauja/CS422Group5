@@ -7,7 +7,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     app:popupTheme="@style/AppTheme.PopupOverlay"
     android:background="@color/cardview_light_background"
-    tools:context=".StoreActivity">
+    tools:context="com.cs442.group5.feedback.StoreActivity">
 <android.support.constraint.ConstraintLayout
                                              android:orientation="horizontal"
                                              android:layout_width="match_parent"

@@ -299,7 +299,7 @@ int userType;
            // mDetailTextView.setText( user.getUid());
 
 
-            User localUser=Libs.getUser();
+            User localUser= Libs.getUser();
             localUser.setUid(user.getUid());
             localUser.setEmail(user.getEmail());
             localUser.setProfileImageURL(null==user.getPhotoUrl()? "https://firebasestorage.googleapis.com/v0/b/feedback-87897.appspot.com/o/StoreImages%2Fdefault.png?alt=media&token=5bdb457e-f082-4839-b116-055af718213c":  user.getPhotoUrl().toString());
