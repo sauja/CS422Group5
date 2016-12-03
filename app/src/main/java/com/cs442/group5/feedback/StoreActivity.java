@@ -1,6 +1,7 @@
 package com.cs442.group5.feedback;
 
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -51,6 +52,9 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.cs442.group5.feedback.model.Review;
 import com.cs442.group5.feedback.model.Store;
+import com.cs442.group5.feedback.model.question.FeedbackForm;
+import com.cs442.group5.feedback.notification.MyFirebaseNotification;
+import com.cs442.group5.feedback.service.FormIntentService;
 import com.cs442.group5.feedback.service.ReviewIntentService;
 import com.cs442.group5.feedback.service.StoreIntentService;
 import com.cs442.group5.feedback.utils.CustomSwipeAdapter;
@@ -94,11 +98,14 @@ public class StoreActivity extends AppCompatActivity {
 	ProgressDialog nProg;
 	RequestQueue queue;
 	Store store;
+	FeedbackForm feedbackForm;
 	private ShareActionProvider miShareAction;
-
+	String storeid=null;
 	ArrayList<Review> reviewList;
 	private static final int GALLERY_INTENT = 2;
 	CollapsingToolbarLayout collapsingToolbar;
+
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -118,7 +125,14 @@ public class StoreActivity extends AppCompatActivity {
 
 		viewPager = (ViewPager) findViewById(R.id.viewPager_storeImages);
 		DatabaseReference df;
-		final String storeid =getIntent().getExtras().get("storeid").toString();
+		if(getIntent().getExtras()!=null)
+			storeid = getIntent().getExtras().getString("storeid");
+		if(storeid==null)
+			storeid=getIntent().getExtras().get("storeid").toString();
+
+		Log.e(TAG, "onCreate: storeid "+storeid);
+
+
 		df = FirebaseDatabase.getInstance().getReference("StoreImages/" + storeid);
 		df.addListenerForSingleValueEvent(new ValueEventListener() {
 			@Override
@@ -157,10 +171,10 @@ public class StoreActivity extends AppCompatActivity {
 
 
 		intent=new Intent(StoreActivity.this,ReviewIntentService.class);
-						intent.putExtra(ReviewIntentService.GET_ALL_REVIEWS,storeid);
-						intent.setAction(ReviewIntentService.GET_ALL_REVIEWS);
-						intent.putExtra("activity",TAG);
-						startService(intent);
+		intent.putExtra(ReviewIntentService.GET_ALL_REVIEWS,storeid);
+		intent.setAction(ReviewIntentService.GET_ALL_REVIEWS);
+		intent.putExtra("activity",TAG);
+		startService(intent);
 		LocalBroadcastManager.getInstance(this).registerReceiver(
 				new BroadcastReceiver() {
 					@Override
@@ -170,12 +184,31 @@ public class StoreActivity extends AppCompatActivity {
 					}
 				}, new IntentFilter(ReviewIntentService.GET_ALL_REVIEWS)
 		);
-
+		intent=new Intent(StoreActivity.this,FormIntentService.class);
+		intent.putExtra(FormIntentService.GET_FORM,storeid);
+		intent.setAction(FormIntentService.GET_FORM);
+		intent.putExtra("activity",TAG);
+		startService(intent);
+		LocalBroadcastManager.getInstance(this).registerReceiver(
+				new BroadcastReceiver() {
+					@Override
+					public void onReceive(Context context, Intent intent) {
+						feedbackForm=new Gson().fromJson(intent.getStringExtra(FormIntentService.GET_FORM), new TypeToken<FeedbackForm>() {}.getType());
+						Log.e(TAG, "onReceive: "+new Gson().toJson(feedbackForm) );
+					}
+				}, new IntentFilter(FormIntentService.GET_FORM)
+		);
 
 		mdatabse = FirebaseDatabase.getInstance().getReference();
 		mStorage = FirebaseStorage.getInstance().getReference();
 		nProg = new ProgressDialog(this);
-
+		NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.cancel(MyFirebaseNotification.REVIEW_NOTIFICATION_ID);
+	}
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		Log.e(TAG, "onNewIntent: "+intent.getStringExtra("storeid") );
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -188,33 +221,7 @@ public class StoreActivity extends AppCompatActivity {
 		return true;
 	}
 
-	public void getAllReviews(final long storeid) {
-		final String url = context.getString(R.string.server_url) + "/review/getAllReviews";
 
-		Log.e(TAG, "getAllReviews: "+storeid );
-		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-			@Override
-			public void onResponse(String response) {
-				Log.e(TAG, "onResponse: getAllReviews "+storeid+" "+response );
-				reviewList=new Gson().fromJson(response,new TypeToken<ArrayList<Review>>() {}.getType());
-				updateReviewFields();
-			}
-		}, new Response.ErrorListener() {
-			@Override
-			public void onErrorResponse(VolleyError error) {
-
-				Log.e("error", error.toString());
-			}
-		}) {
-			@Override
-			protected Map<String, String> getParams() throws AuthFailureError {
-				Map<String, String> parameters = new HashMap<String, String>();
-				parameters.put("storeid", String.valueOf(storeid));
-				return parameters;
-			}
-		};
-		Libs.getQueueInstance().add(postRequest);
-	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// handle arrow click here
@@ -248,11 +255,11 @@ public class StoreActivity extends AppCompatActivity {
 						}
 					});
 				}
-		break;
-	}
+				break;
+		}
 
-	return super.onOptionsItemSelected(item);
-}
+		return super.onOptionsItemSelected(item);
+	}
 
 	public Uri getLocalBitmapUri(ImageView imageView) {
 		// Extract Bitmap from ImageView drawable
@@ -360,7 +367,20 @@ public class StoreActivity extends AppCompatActivity {
 		});
 		openDialog.show();
 	}
-
+	public void onAddReview(View view)
+	{
+		if(feedbackForm==null)
+		{
+			rateMe(new View(context));
+		}
+		else {
+			Intent intent=new Intent(StoreActivity.this,AddReviewActivity.class);
+			intent.putExtra("storeid",storeid);
+			Log.e(TAG, "onAddReview: "+new Gson().toJson(feedbackForm) );
+			intent.putExtra("structure",new Gson().toJson(feedbackForm));
+			startActivity(intent);
+		}
+	}
 	public void addReview(final Review r) {
 		Log.e(TAG, "addReview: " + r.getStoreid() + "\n"
 				+ r.getUid() + "\n" + r.getComment());
@@ -439,8 +459,13 @@ public class StoreActivity extends AppCompatActivity {
 	public void getDirections(View view) {
 		Toast.makeText(context, "get directions", Toast.LENGTH_SHORT).show();
 		Intent intent=new Intent(StoreActivity.this,DirectionsActivity.class);
-		intent.putExtra("address",store.getAddress()+","+store.getLocation());
-		startActivity(intent);
+		if(store!=null){
+			intent.putExtra("address",store.getAddress()+","+store.getLocation());
+			startActivity(intent);}
+		else
+		{
+			Toast.makeText(context, "Network Error", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {

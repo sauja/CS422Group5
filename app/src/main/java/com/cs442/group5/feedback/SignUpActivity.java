@@ -388,17 +388,20 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
 						}
 						else {
 
-							User u = Libs.getUser();
+							User u = new User();
 
 							u.setUid(mAuth.getCurrentUser().getUid());
 							u.setfName(fName.getText().toString());
 							u.setlName(lName.getText().toString());
+							u.setDisplayName(u.getfName()+" "+u.getlName());
 							u.setUsername(userName.getText().toString());
 							u.setEmail(mEmailView.getText().toString());
 							u.setProfileImageURL("https://firebasestorage.googleapis.com/v0/b/feedback-87897.appspot.com/o/StoreImages%2Fdefault.png?alt=media&token=5bdb457e-f082-4839-b116-055af718213c");
 							DatabaseReference ref = db.getReference();
 							ref.child("user").child(u.getUid()).setValue(u);
+							Libs.setUser(u);
 							Libs.saveUserToSharedPref(u);
+
 							Intent intent=new Intent(SignUpActivity.this,UserIntentService.class);
 							intent.setAction(UserIntentService.UPDATE_USER);
 							intent.putExtra(UserIntentService.UPDATE_USER,new Gson().toJson(Libs.getUser()));

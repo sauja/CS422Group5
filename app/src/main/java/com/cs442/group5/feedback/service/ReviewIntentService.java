@@ -12,6 +12,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.cs442.group5.feedback.AddReviewActivity;
 import com.cs442.group5.feedback.DashBoardActivity;
 import com.cs442.group5.feedback.MyStorePageActivity;
 import com.cs442.group5.feedback.NewStoreActivity;
@@ -70,6 +71,7 @@ public class ReviewIntentService extends IntentService {
 					break;
 				case ADD_REVIEW:
 					Review r=new Gson().fromJson(intent.getStringExtra(ADD_REVIEW),new TypeToken<Review>() {}.getType());
+
 					addReview(r);
 					break;
 			}
@@ -111,8 +113,9 @@ public class ReviewIntentService extends IntentService {
 		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
 			@Override
 			public void onResponse(String response) {
-				Toast.makeText(Libs.getContext(), "Added", Toast.LENGTH_SHORT).show();
+				Toast.makeText(Libs.getContext(), "Review Added", Toast.LENGTH_SHORT).show();
 				Log.e(TAG, "onResponse: " + response);
+				sendStoreBroadcast(response,ADD_REVIEW);
 			}
 		}, new Response.ErrorListener() {
 			@Override
@@ -165,6 +168,9 @@ public class ReviewIntentService extends IntentService {
 		Intent broadcastIntent=null;
 		switch (broadcastClass)
 		{
+			case "AddReviewActivity":
+				broadcastIntent=new Intent(ReviewIntentService.this,AddReviewActivity.class);
+				break;
 			case "MyStorePageActivity":
 				broadcastIntent=new Intent(ReviewIntentService.this,MyStorePageActivity.class);
 				break;

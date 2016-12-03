@@ -26,7 +26,7 @@
         android:onClick="onClickFormName"
         android:layout_marginEnd="16dp"
         app:layout_constraintRight_toRightOf="parent"
-        android:text="Sdfth"
+        android:text="New Form"
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toTopOf="parent"/>
 

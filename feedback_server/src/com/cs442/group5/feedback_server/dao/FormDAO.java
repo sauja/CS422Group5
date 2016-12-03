@@ -40,27 +40,30 @@ public class FormDAO {
 	}
 	public Form getForm(Connection connection,long id) throws Exception
 	{
+		System.out.println("GET_FORM "+id);
 		Form feedData =null;
 		try
 		{
-			PreparedStatement ps = (connection).prepareStatement("SELECT `id`,`name`,`address`,`location`,`zipcode`,`phone_no`,`emailid`,`website`,`gps`,`ownerid` FROM `store` where id="+id+" ORDER BY id DESC");
+			PreparedStatement ps = (connection).prepareStatement("SELECT * FROM feedback_db.forms where storeid=? order by id desc ;");
+			ps.setLong(1,id);
 			ResultSet rs = ps.executeQuery();
 			while(rs.next())
 			{
 				Form formObject = new Form();
-				/*storeObject.setId(rs.getLong("id"));
-				storeObject.setName(rs.getString("name"));
-				storeObject.setAddress(rs.getString("address"));
-				storeObject.setLocation(rs.getString("location"));
-				storeObject.setZipcode(rs.getString("zipcode"));
-				if(storeObject.getName()!=null)
-					feedData=storeObject;*/
+				formObject.setId(rs.getLong("id"));
+				formObject.setFormid(rs.getString("formid"));
+				formObject.setName(rs.getString("name"));
+				formObject.setStructure(rs.getString("structure"));
+				formObject.setStoreid(rs.getLong("storeid"));
+				feedData=formObject;
+				break;
 			}
 			return feedData;
 		}
 		catch(Exception e)
 		{
-			throw e;
+			e.printStackTrace();
+			return null;
 		}
 	}
 }

@@ -34,8 +34,10 @@ public  class Libs extends Application {
 	}
 	public static RequestQueue getQueueInstance()
 	{
-		if(queue==null)
-			queue= Volley.newRequestQueue(getContext());
+		if(queue==null) {
+			queue = Volley.newRequestQueue(getContext());
+
+		}
 		return queue;
 	}
 	public static FirebaseAuth getFirebaseAuth()
@@ -59,6 +61,11 @@ public  class Libs extends Application {
 		}
 		return user;
 	}
+
+	public static void setUser(User user) {
+		Libs.user = user;
+	}
+
 	@Override
 	public void onCreate() {
 		super.onCreate();

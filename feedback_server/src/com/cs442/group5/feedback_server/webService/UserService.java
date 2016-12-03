@@ -65,8 +65,6 @@ public class UserService {
 							+" `usertype` = ?,"
 							+" `tokenid` = ?,"
 							+" `displayname` = ?,"
-							+" `fName` = ?,"
-							+" `lName` =?,"
 							+" `username` = ?,"
 							+" `email` = ?,"
 							+" `profileImageURL` = ?"
@@ -75,12 +73,10 @@ public class UserService {
 				    ps.setInt(1, user.getUserType());
 				    ps.setString(2, user.getTokenid());
 				    ps.setString(3, user.getDisplayName());
-				    ps.setString(4, user.getfName());
-				    ps.setString(5, user.getlName());
-				    ps.setString(6, user.getUsername());
-				    ps.setString(7, user.getEmail());
-				    ps.setString(8, user.getProfileImageURL());
-				    ps.setString(9, user.getUid());
+				    ps.setString(4, user.getUsername());
+				    ps.setString(5, user.getEmail());
+				    ps.setString(6, user.getProfileImageURL());
+				    ps.setString(7, user.getUid());
 					ps.executeUpdate();
 					return "true";
 			    }

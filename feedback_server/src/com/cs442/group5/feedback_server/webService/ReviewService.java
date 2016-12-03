@@ -18,7 +18,11 @@ import com.cs442.group5.feedback_server.dao.Database;
 import com.cs442.group5.feedback_server.dto.Review;
 import com.cs442.group5.feedback_server.dto.ReviewRatingCountChart;
 import com.cs442.group5.feedback_server.dto.Store;
+import com.cs442.group5.feedback_server.noti.Notification;
 import com.google.gson.Gson;
+
+
+
 
 @Path("/review")
 public class ReviewService {
@@ -37,7 +41,7 @@ public class ReviewService {
 		String feeds  = "false";
 		try 
 		{
-			
+			System.out.println("storeid "+storeid);
 			Database database= new Database();
 			Connection connection = database.Get_Connection();
 			PreparedStatement ps = (connection).prepareStatement("INSERT INTO `feedback_db`.`review` (`storeid`,`uid`,`comment`,`rating`) VALUES (?,?,?,?)");
@@ -46,6 +50,22 @@ public class ReviewService {
 			ps.setString(3, comment);
 			ps.setFloat(4, Float.valueOf(rating));
 			ps.executeUpdate();
+			
+			ps=(connection).prepareStatement("select u.uid, u.tokenid, u.displayname,s.id as storeid,s.name as storename from  user as u,store as s "
+					+ "where s.ownerid=u.uid and s.id=? and u.uid=?");
+			ps.setInt(1, storeid);
+			ps.setString(2, uid);
+			ResultSet rs=ps.executeQuery();
+			while(rs.next())
+			{
+				String storename=rs.getString("storename");
+				String tokenid=rs.getString("tokenid");
+				String displayname=rs.getString("displayname");
+				Notification.sendReviewNoti(tokenid, storeid,storename, displayname);
+				System.out.println("Send Notification "+storeid+" \n"+storename+" "+displayname+" "+tokenid);
+				break;
+			}
+			
 			return "true";
 
 

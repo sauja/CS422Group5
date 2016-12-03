@@ -84,7 +84,7 @@
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:onClick="addReview">
+        android:onClick="onAddReview">
 
         <TextView
             android:text="Add a review"

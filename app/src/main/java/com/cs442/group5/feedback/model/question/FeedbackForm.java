@@ -2,9 +2,7 @@ package com.cs442.group5.feedback.model.question;
 
 import android.content.Context;
 import android.util.Log;
-import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -34,6 +32,12 @@ import java.util.Map;
  */
 
 public class FeedbackForm {
+	long id;
+	String name;
+	String structure;
+	String formid;
+	long storeid;
+	String iddefault;
 	String formName="";
 	ArrayList<Question> questions;
 	private static final String TAG=FeedbackForm.class.getSimpleName();
@@ -89,14 +93,10 @@ public class FeedbackForm {
 					ratingBar.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 					layout.addView(ratingBar);
 					break;
-
-
 			}
 		}
-		final Button btn_save=new Button(context);
-		btn_save.setText("Save");
-		layout.addView(btn_save);
-		btn_save.setOnClickListener(new View.OnClickListener() {
+
+		/*btn_save.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				createForm((long)1,context,jsonItems);
@@ -173,7 +173,7 @@ public class FeedbackForm {
 				}
 
 			}
-		});
+		});*/
 
 	}
 

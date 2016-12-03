@@ -13,6 +13,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.cs442.group5.feedback.DashBoardActivity;
+import com.cs442.group5.feedback.MyStorePageActivity;
 import com.cs442.group5.feedback.NewStoreActivity;
 import com.cs442.group5.feedback.R;
 import com.cs442.group5.feedback.StoreActivity;
@@ -220,7 +221,9 @@ public class StoreIntentService extends IntentService {
 			case "DashBoardActivity":
 				broadcastIntent=new Intent(StoreIntentService.this,DashBoardActivity.class);
 				break;
-
+			case "MyStorePageActivity":
+				broadcastIntent=new Intent(StoreIntentService.this,MyStorePageActivity.class);
+				break;
 			case "StoreActivity":
 				broadcastIntent=new Intent(StoreIntentService.this,StoreActivity.class);
 				break;

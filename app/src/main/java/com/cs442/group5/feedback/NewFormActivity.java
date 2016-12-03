@@ -35,7 +35,7 @@ import java.util.List;
 
 public class NewFormActivity extends AppCompatActivity
 {
-	private static final String TAG=NewFormActivity.class.getSimpleName();
+	private static final String TAG="NewFormActivity";
 	Context context=this;
 	TextView textView_formName;
 	Spinner spinner_questionType;
@@ -49,6 +49,7 @@ public class NewFormActivity extends AppCompatActivity
 	SharedPreferences sf;
 	SharedPreferences.Editor editor;
 	Gson gson=new Gson();
+	String storeid;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -138,7 +139,8 @@ public class NewFormActivity extends AppCompatActivity
 
 		Intent i = new Intent(this,FormPreviewActivity.class);
 
-		i.putExtra("FORMDATA",gson.toJson(feedbackForm) );
+		i.putExtra("structure",gson.toJson(feedbackForm) );
+		i.putExtra("storeid",storeid);
 		Log.e("JASAON", "onClickPreview: "+gson.toJson(feedbackForm)  );
 		startActivity(i);
 	}
@@ -269,6 +271,8 @@ public class NewFormActivity extends AppCompatActivity
 	protected void onResume() {
 		Log.e(TAG, "onResume: " );
 		super.onResume();
+		storeid=getIntent().getExtras().get("storeid").toString();
+		Log.e(TAG, "onResume: "+storeid );
 		if(sf.contains("FORM"))
 		{
 			FeedbackForm f=gson.fromJson(sf.getString("FORM",null),new TypeToken<FeedbackForm>() {}.getType());
@@ -276,6 +280,7 @@ public class NewFormActivity extends AppCompatActivity
 			if(f!=null)
 			{
 				feedbackForm=f;
+
 			}
 			else
 				feedbackForm=new FeedbackForm();

@@ -13,13 +13,13 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
-        android:name="com.cs442.group5.feedback.utils.Libs"
+        android:name=".utils.Libs"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.cs442.group5.feedback.SplashScreen"
+            android:name=".SplashScreen"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:noHistory="true"
             android:theme="@style/SplashTheme">
@@ -29,46 +29,49 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter android:label="@string/app_name">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with "http://recipe-app.com/recipe"
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <!--
+                Accepts URIs that begin with "http://recipe-app.com/recipe"
                 adb shell am start -a android.intent.action.VIEW \-d "http://ec2-52-91-230-7.compute-1.amazonaws.com/store/1" com.cs442.group5.feedback
                  http://ec2-52-91-230-7.compute-1.amazonaws.com/recipe/1
-                 -->
-                <data android:scheme="http"
-                      android:host="@string/host"
-                      android:pathPrefix="@string/path" />
+                -->
+                <data
+                    android:host="@string/host"
+                    android:pathPrefix="@string/path"
+                    android:scheme="http"/>
             </intent-filter>
         </activity>
         <activity
-            android:name="com.cs442.group5.feedback.DashBoardActivity"
+            android:name=".DashBoardActivity"
             android:label="@string/title_activity_dash_board"
             android:theme="@style/AppTheme">
         </activity>
-        <activity android:name="com.cs442.group5.feedback.NewFormActivity">
+        <activity android:name=".NewFormActivity">
         </activity>
         <activity
-            android:name="com.cs442.group5.feedback.NewStoreActivity"
+            android:name=".NewStoreActivity"
             android:label="New Store"
             android:theme="@style/AppTheme">
         </activity>
         <activity
-            android:name="com.cs442.group5.feedback.TermsNConditions"
+            android:name=".TermsNConditions"
             android:label="@string/title_activity_terms_nconditions"
-            android:parentActivityName="com.cs442.group5.feedback.DashBoardActivity"
+            android:parentActivityName=".DashBoardActivity"
             android:theme="@style/AppTheme">
         </activity>
         <activity
-            android:name="com.cs442.group5.feedback.MyProfileActivity"
-            android:parentActivityName="com.cs442.group5.feedback.DashBoardActivity"/>
+            android:name=".MyProfileActivity"
+            android:parentActivityName=".DashBoardActivity"/>
         <activity
-            android:name="com.cs442.group5.feedback.StoreActivity"
-            android:parentActivityName="com.cs442.group5.feedback.DashBoardActivity"/>
+            android:name=".StoreActivity"
+            android:parentActivityName=".DashBoardActivity"/>
         <activity
-            android:name="com.cs442.group5.feedback.SignUpActivity"
-            android:parentActivityName="com.cs442.group5.feedback.LoginActivity"/>
-        <activity android:name="com.cs442.group5.feedback.FormPreviewActivity"/>
+            android:name=".SignUpActivity"
+            android:parentActivityName=".LoginActivity"/>
+        <activity android:name=".FormPreviewActivity"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"
@@ -87,73 +90,90 @@
             android:value="@string/google_maps_key"/>
 
         <activity
-            android:name="com.cs442.group5.feedback.MyStoreActivity"
+            android:name=".MyStoreActivity"
             android:label="@string/title_activity_my_store"
-            android:parentActivityName="com.cs442.group5.feedback.DashBoardActivity"
+            android:parentActivityName=".DashBoardActivity"
             android:theme="@style/AppTheme">
         </activity>
         <activity
-            android:name="com.cs442.group5.feedback.DirectionsActivity"
+            android:name=".DirectionsActivity"
             android:label="@string/title_activity_directions"
             android:theme="@style/AppTheme">
         </activity>
 
-        <service android:name="com.cs442.group5.feedback.notification.MyFirebaseNotification">
+        <service android:name=".notification.MyFirebaseNotification">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
 
         <activity
-            android:name="com.cs442.group5.feedback.MoreReviewsActivity"
+            android:name=".MoreReviewsActivity"
             android:label="@string/title_activity_more_reviews"
             android:theme="@style/AppTheme">
         </activity>
         <activity
-            android:name="com.cs442.group5.feedback.LoginActivity"
+            android:name=".LoginActivity"
             android:label="@string/title_activity_more_reviews"
             android:theme="@style/AppTheme">
         </activity>
         <activity
-            android:name="com.cs442.group5.feedback.IntroActivity"
+            android:name=".IntroActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_intro"
-            android:parentActivityName="com.cs442.group5.feedback.LoginActivity"
+            android:parentActivityName=".LoginActivity"
             android:theme="@style/Theme.Intro">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.cs442.group5.feedback.LoginActivity"/>
         </activity>
         <activity
-            android:name="com.cs442.group5.feedback.MyStorePageActivity"
-            android:parentActivityName="com.cs442.group5.feedback.MyStoreActivity">
+            android:name=".MyStorePageActivity"
+            android:parentActivityName=".MyStoreActivity">
         </activity>
 
         <service
-            android:name="com.cs442.group5.feedback.notification.MyFirebaseInstanceIDService"
+            android:name=".notification.MyFirebaseInstanceIDService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
         </service>
         <service
-            android:name="com.cs442.group5.feedback.service.ReviewIntentService"
+            android:name=".service.FormIntentService"
             android:exported="false">
         </service>
         <service
-            android:name="com.cs442.group5.feedback.service.StoreIntentService"
+            android:name=".service.ReviewIntentService"
             android:exported="false">
         </service>
         <service
-            android:name="com.cs442.group5.feedback.service.UserIntentService"
+            android:name=".service.StoreIntentService"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".service.UserIntentService"
             android:exported="false">
         </service>
 
         <activity
-            android:name="com.cs442.group5.feedback.BookMarkActivity"
+            android:name=".BookMarkActivity"
             android:label="@string/title_activity_book_mark"
             android:theme="@style/AppTheme">
+        </activity>
+        <activity android:name=".Test">
+        </activity>
+        <activity android:name=".Test2">
+        </activity>
+        <activity
+            android:name=".AddReviewActivity"
+            android:label="@string/title_activity_add_review"
+            android:parentActivityName=".StoreActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cs442.group5.feedback.StoreActivity"/>
         </activity>
     </application>
 

@@ -1,5 +1,6 @@
 package com.cs442.group5.feedback;
 
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +20,10 @@ import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
 import com.cs442.group5.feedback.model.ReviewRatingCountChart;
+import com.cs442.group5.feedback.model.Store;
+import com.cs442.group5.feedback.notification.MyFirebaseNotification;
 import com.cs442.group5.feedback.service.ReviewIntentService;
+import com.cs442.group5.feedback.service.StoreIntentService;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
@@ -40,7 +44,7 @@ public class MyStorePageActivity extends AppCompatActivity {
 	BarDataSet Bardataset ;
 	BarData BARDATA ;
 	long storeid=-1;
-	String storename="";
+	String storename=null;
 	TextView textView_name;
 	int count =0;
 	float rating = 0.0f;
@@ -50,17 +54,50 @@ public class MyStorePageActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_my_store_page);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-context=this;
-
+		context=this;
+		textView_name = (TextView) findViewById(R.id.textView_name);
+		Bundle b=getIntent().getExtras();
 		if (getSupportActionBar() != null)
 		{
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 			getSupportActionBar().setDisplayShowHomeEnabled(true);
 		}
-		storeid= (long) getIntent().getExtras().get("storeid");
-		storename=(String)getIntent().getExtras().get("storename");
-		textView_name=(TextView)findViewById(R.id.textView_name);
-		textView_name.setText(storename);
+		if(getIntent().getExtras()!=null)
+		{
+
+			String str=getIntent().getExtras().getString("storeid");
+			if(str!=null)
+				storeid = Long.parseLong(getIntent().getExtras().getString("storeid"));
+				storename=getIntent().getExtras().getString("storename");
+			Log.e(TAG, "onCreate: noti storeid  "+storeid +" "+storename);
+		}
+
+		if(storeid==-1)
+		{
+			storeid=(long) getIntent().getExtras().get("storeid");
+			storename=getIntent().getExtras().get("storename").toString();
+			textView_name.setText(storename);
+			Log.e(TAG, "onCreate: fromacti storeid  "+storeid +" "+storename);
+		}
+		if(storename==null) {
+			Intent storeIntent = new Intent(MyStorePageActivity.this, StoreIntentService.class);
+			storeIntent.putExtra(StoreIntentService.GET_STORE, String.valueOf(storeid));
+			storeIntent.putExtra("activity", TAG);
+			storeIntent.setAction(StoreIntentService.GET_STORE);
+			startService(storeIntent);
+			LocalBroadcastManager.getInstance(this).registerReceiver(
+					new BroadcastReceiver() {
+						@Override
+						public void onReceive(Context context, Intent intent) {
+							Store store = new Gson().fromJson(intent.getStringExtra(StoreIntentService.GET_STORE), new TypeToken<Store>() {
+							}.getType());
+
+							textView_name.setText(store.getName());
+
+						}
+					}, new IntentFilter(StoreIntentService.GET_STORE)
+			);
+		}
 		Log.e(TAG, "onCreate: "+storeid );
 		Intent intent=new Intent(MyStorePageActivity.this,ReviewIntentService.class);
 		intent.putExtra(ReviewIntentService.GET_REVIEW_FOR_CHART,storeid);
@@ -75,6 +112,8 @@ context=this;
 					}
 				}, new IntentFilter(ReviewIntentService.GET_REVIEW_FOR_CHART)
 		);
+		NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.cancel(MyFirebaseNotification.REVIEW_NOTIFICATION_ID);
 	}
 	public void buildChart(String response)
 	{
@@ -226,5 +265,17 @@ context=this;
 				break;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	public void onNewForm(View view)
+	{
+		Intent intent = new Intent(this, NewFormActivity.class);
+		intent.putExtra("storeid",storeid);
+		startActivity(intent);
+	}
+	public void onEditForm(View view)
+	{
+		Intent intent = new Intent(this, NewFormActivity.class);
+		intent.putExtra("storeid",storeid);
+		startActivity(intent);
 	}
 }

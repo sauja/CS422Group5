@@ -37,6 +37,7 @@ public class FormService {
 				form.setStoreid(storeid);
 				
 				feeds = projectManager.addForm(form);
+				System.out.println("addForm "+feeds);
 				return feeds;
 			}
 			
@@ -44,13 +45,14 @@ public class FormService {
 		{
 			System.out.println("error "+e);
 		}
+		System.out.println("addForm "+feeds);
 		return feeds;
 	}
 	@POST
 	@Path("/getForm")
 	@Consumes("application/x-www-form-urlencoded")
 	@Produces("application/json")
-	public String getForm( @FormParam("id") long id ) {
+	public String getForm( @FormParam("storeid") long id ) {
 		String feeds  = null;
 		try 
 		{
@@ -58,11 +60,13 @@ public class FormService {
 			Form feedData = null;
 			FormManager projectManager= new FormManager();
 			feedData = projectManager.getForm(id);
+			if(feedData==null)
+				return null;
 			//StringBuffer sb = new StringBuffer();
 			Gson gson = new Gson();
 			System.out.println(gson.toJson(feedData));
-			feeds = gson.toJson(feedData);
-
+			feeds = feedData.getStructure();//gson.toJson(feedData);
+			System.out.println("GET_FORM: "+feeds);
 		} catch (Exception e)
 		{
 			System.out.println("error "+e);

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.cs442.group5.feedback.NewFormActivity">
+    tools:context="com.cs442.group5.feedback.AddReviewActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -19,11 +19,11 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:title="Form"/>
+        android:title="Add Review"/>
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_new_form"/>
+    <include layout="@layout/content_add_review"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -31,8 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/preview"
-        android:onClick="onClickPreview"
-        app:elevation="14dp"/>
+        app:srcCompat="@android:drawable/ic_menu_save"
+    android:onClick="onSave"/>
 
 </android.support.design.widget.CoordinatorLayout>

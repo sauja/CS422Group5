@@ -18,5 +18,14 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/home/sauja7/Desktop/CS422Group5/feedback_server/WebContent/WEB-INF/lib/mysql-connector-java-5.0.8-bin.jar"/>
+	<classpathentry kind="lib" path="/home/sauja7/Desktop/CS422Group5/feedback_server/WebContent/WEB-INF/lib/gson-2.2.1.jar"/>
+	<classpathentry kind="lib" path="/home/sauja7/Desktop/CS422Group5/feedback_server/WebContent/WEB-INF/lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/home/sauja7/Desktop/CS422Group5/feedback_server/WebContent/WEB-INF/lib/gcm-server.jar"/>
+	<classpathentry kind="lib" path="/home/sauja7/Desktop/CS422Group5/feedback_server/WebContent/WEB-INF/lib/jersey-server-1.0.3.jar"/>
+	<classpathentry kind="lib" path="/home/sauja7/Desktop/CS422Group5/feedback_server/WebContent/WEB-INF/lib/jersey-client-1.0.3.jar"/>
+	<classpathentry kind="lib" path="/home/sauja7/Desktop/CS422Group5/feedback_server/WebContent/WEB-INF/lib/asm-3.1.jar"/>
+	<classpathentry kind="lib" path="/home/sauja7/Desktop/CS422Group5/feedback_server/WebContent/WEB-INF/lib/jsr311-api-1.0.jar"/>
+	<classpathentry kind="lib" path="/home/sauja7/Desktop/CS422Group5/feedback_server/WebContent/WEB-INF/lib/jersey-core-1.0.3.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
