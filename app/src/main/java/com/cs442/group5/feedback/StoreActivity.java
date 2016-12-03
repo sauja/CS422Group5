@@ -48,8 +48,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.cs442.group5.feedback.model.Review;
 import com.cs442.group5.feedback.model.Store;
 import com.cs442.group5.feedback.model.question.FeedbackForm;
@@ -75,6 +73,8 @@ import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mypopsy.maps.StaticMap;
+
+import net.glxn.qrgen.android.QRCode;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -238,22 +238,33 @@ public class StoreActivity extends AppCompatActivity {
 			case R.id.action_share:
 				if(store!=null){
 					final ImageView imageView=new ImageView(this);
-					Glide.with(context).load(store.getImgurl()).asBitmap().thumbnail(0.1f).into(new SimpleTarget<Bitmap>(100,100) {
+					final String uri="http://"+getString(R.string.host)+getString(R.string.path)+"/"+store.getId();
+					Bitmap myBitmap = QRCode.from(uri).bitmap();
+					imageView.setImageBitmap(myBitmap);
+					Uri bmpUri = getLocalBitmapUri(imageView);
+					Intent shareIntent = new Intent();
+					shareIntent.putExtra(Intent.EXTRA_TEXT, uri);
+					shareIntent.putExtra(Intent.EXTRA_STREAM, bmpUri);
+					shareIntent.setType("image/*");
+					shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+					startActivity(Intent.createChooser(shareIntent, "Send"));
+					/*Glide.with(context).load(store.getImgurl()).asBitmap().thumbnail(0.1f).into(new SimpleTarget<Bitmap>(100,100) {
 						@Override
 						public void onResourceReady(Bitmap resource, GlideAnimation glideAnimation) {
 							imageView.setImageBitmap(resource); // Possibly runOnUiThread()
 							Intent shareIntent = new Intent();
 							shareIntent.setAction(Intent.ACTION_SEND);
-							String uri="http://"+getString(R.string.host)+getString(R.string.path)+"/"+store.getId();
+
 							shareIntent.putExtra(Intent.EXTRA_TEXT, uri);
 
 							Uri bmpUri = getLocalBitmapUri(imageView);
+
 							shareIntent.putExtra(Intent.EXTRA_STREAM, bmpUri);
 							shareIntent.setType("image/*");
 							shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 							startActivity(Intent.createChooser(shareIntent, "Send"));
 						}
-					});
+					});*/
 				}
 				break;
 		}

@@ -328,10 +328,7 @@ public class DashBoardActivity extends AppCompatActivity
 				startActivity(intent);
 				finish();
 				break;
-			case R.id.new_form:
-				intent = new Intent(this, NewFormActivity.class);
-				startActivity(intent);
-				break;
+
 			case R.id.my_stores:
 				intent = new Intent(this, MyStoreActivity.class);
 				startActivity(intent);

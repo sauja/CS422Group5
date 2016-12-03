@@ -6,10 +6,7 @@
             android:id="@+id/dashboard"
             android:icon="@drawable/home_outline"
             android:title="Dashboard"/>
-        <item
-            android:id="@+id/new_form"
-            android:icon="@drawable/shape_square_plus"
-            android:title="New Form"/>
+
         <item
             android:id="@+id/my_stores"
             android:icon="@drawable/domain"
