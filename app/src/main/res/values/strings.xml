@@ -105,10 +105,10 @@
     </string-array>
     <string name="title_activity_new_store">New Store</string>
     <string name="title_activity_test_map">Map</string>
-     <string name="server_url">
+    <!-- <string name="server_url">
          http://ec2-52-91-230-7.compute-1.amazonaws.com:8080/feedback_server/REST
-      </string>
-    <!--  <string name="server_url">http://192.168.1.110:8080/feedback_server/REST</string>-->
+     </string>-->
+       <string name="server_url">http://208.59.157.234:8080/feedback_server/REST</string>
     <string name="location_permission_denied">location_permission_denied</string>
     <string name="permission_required_toast">permission_required_toast</string>
     <string name="permission_rationale_location">permission_rationale_location</string>
@@ -138,4 +138,5 @@
     <string name="host">feedback.com</string>
     <string name="path">/store</string>
     <string name="title_activity_add_review">AddReviewActivity</string>
+    <string name="title_activity_qrreader">QRReader</string>
 </resources>

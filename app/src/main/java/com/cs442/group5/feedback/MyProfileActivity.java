@@ -112,8 +112,6 @@ public class MyProfileActivity extends AppCompatActivity {
 								u = user;
 								if(u==null)
 								{
-									Intent intent=new Intent(MyProfileActivity.this,LoginActivity.class);
-									startActivity(intent);
 									return;
 								}
 								if (Libs.getUser().getUserType() == Const.USER_EMAIL)

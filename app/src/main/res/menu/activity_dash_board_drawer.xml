@@ -6,7 +6,10 @@
             android:id="@+id/dashboard"
             android:icon="@drawable/home_outline"
             android:title="Dashboard"/>
-
+        <item
+            android:id="@+id/qr"
+            android:icon="@drawable/qrcode_scan"
+            android:title="Scan QR"/>
         <item
             android:id="@+id/my_stores"
             android:icon="@drawable/domain"

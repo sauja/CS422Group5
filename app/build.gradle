@@ -1,6 +1,9 @@
 buildscript {
     repositories {
         maven { url 'https://maven.fabric.io/public' }
+        maven {
+            url "https://jitpack.io"
+        }
     }
 
     dependencies {
@@ -95,6 +98,8 @@ dependencies {
     compile 'com.github.PhilJay:MPAndroidChart:v2.2.4'
     compile 'agency.tango.android:material-intro-screen:0.0.4'
     compile 'com.github.kenglxn.QRGen:android:2.2.0'
+    compile ('eu.livotov.labs.android:CAMView:2.0.1@aar') {transitive=true}
+    compile 'com.github.jksiezni.permissive:permissive:0.1'
     testCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.android.application'

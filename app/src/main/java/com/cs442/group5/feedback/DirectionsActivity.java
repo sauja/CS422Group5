@@ -150,14 +150,8 @@ public class DirectionsActivity extends AppCompatActivity implements OnMapReadyC
 	}
 
 	private void initMap() {
-
 		MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.mapFragment);
 		mapFragment.getMapAsync(this);
-
-
-
-
-
 	}
 
 	private String getDirectionsUrl(LatLng user_ll, LatLng dest_ll) {

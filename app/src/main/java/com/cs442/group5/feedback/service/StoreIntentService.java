@@ -95,7 +95,7 @@ public class StoreIntentService extends IntentService {
 				Log.e("error",error.toString());
 			}
 		});
-
+		postRequest.setRetryPolicy(Libs.getTimeoutPolicy(30000));
 		Libs.getQueueInstance().add(postRequest);
 
 	}
@@ -123,6 +123,7 @@ public class StoreIntentService extends IntentService {
 				return parameters;
 			}
 		};
+		postRequest.setRetryPolicy(Libs.getTimeoutPolicy(30000));
 		Libs.getQueueInstance().add(postRequest);
 
 	}
@@ -149,6 +150,7 @@ public class StoreIntentService extends IntentService {
 				return parameters;
 			}
 		};
+		postRequest.setRetryPolicy(Libs.getTimeoutPolicy(30000));
 		Libs.getQueueInstance().add(postRequest);
 	}
 
@@ -175,6 +177,7 @@ public class StoreIntentService extends IntentService {
 				return parameters;
 			}
 		};
+		postRequest.setRetryPolicy(Libs.getTimeoutPolicy(30000));
 		Libs.getQueueInstance().add(postRequest);
 	}
 	public void addStore(final String store)
@@ -206,6 +209,7 @@ public class StoreIntentService extends IntentService {
 				return parameters;
 			}
 		};
+		postRequest.setRetryPolicy(Libs.getTimeoutPolicy(30000));
 			Libs.getQueueInstance().add(postRequest);
 
 	}

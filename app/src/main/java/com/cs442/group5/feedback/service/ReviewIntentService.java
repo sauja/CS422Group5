@@ -102,7 +102,7 @@ public class ReviewIntentService extends IntentService {
 				parameters.put("storeid", storeid);
 				return parameters;
 			}
-		};
+		};postRequest.setRetryPolicy(Libs.getTimeoutPolicy(30000));
 		Libs.getQueueInstance().add(postRequest);
 	}
 	public void addReview(final Review r) {
@@ -134,6 +134,7 @@ public class ReviewIntentService extends IntentService {
 				return parameters;
 			}
 		};
+		postRequest.setRetryPolicy(Libs.getTimeoutPolicy(30000));
 		Libs.getQueueInstance().add(postRequest);
 	}
 	public void getReviewRatingCountChart(final long storeid) {
@@ -161,6 +162,7 @@ public class ReviewIntentService extends IntentService {
 				return parameters;
 			}
 		};
+		postRequest.setRetryPolicy(Libs.getTimeoutPolicy(30000));
 		Libs.getQueueInstance().add(postRequest);
 	}
 	private void sendStoreBroadcast(String response,String action)

@@ -4,7 +4,9 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
+import com.android.volley.RetryPolicy;
 import com.android.volley.toolbox.Volley;
 import com.cs442.group5.feedback.model.User;
 import com.google.firebase.auth.FirebaseAuth;
@@ -39,6 +41,14 @@ public  class Libs extends Application {
 
 		}
 		return queue;
+	}
+	public static RetryPolicy getTimeoutPolicy(int timeout)
+	{
+		RetryPolicy policy = new DefaultRetryPolicy(timeout,
+				DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+				DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+		return policy;
+
 	}
 	public static FirebaseAuth getFirebaseAuth()
 	{

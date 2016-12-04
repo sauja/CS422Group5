@@ -1,5 +1,6 @@
 package com.cs442.group5.feedback;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
@@ -8,7 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -18,7 +19,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
@@ -58,6 +58,9 @@ import com.cs442.group5.feedback.service.StoreIntentService;
 import com.cs442.group5.feedback.utils.CustomSwipeAdapter;
 import com.cs442.group5.feedback.utils.Libs;
 import com.cs442.group5.feedback.utils.RatingColor;
+import com.github.jksiezni.permissive.PermissionsGrantedListener;
+import com.github.jksiezni.permissive.PermissionsRefusedListener;
+import com.github.jksiezni.permissive.Permissive;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -105,7 +108,7 @@ public class StoreActivity extends AppCompatActivity {
 	private static final int GALLERY_INTENT = 2;
 	CollapsingToolbarLayout collapsingToolbar;
 
-
+	ArrayList<String> imgList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -124,26 +127,96 @@ public class StoreActivity extends AppCompatActivity {
 		collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
 
 		viewPager = (ViewPager) findViewById(R.id.viewPager_storeImages);
-		DatabaseReference df;
+
 		if(getIntent().getExtras()!=null)
 			storeid = getIntent().getExtras().getString("storeid");
 		if(storeid==null)
 			storeid=getIntent().getExtras().get("storeid").toString();
 
 		Log.e(TAG, "onCreate: storeid "+storeid);
+		mdatabse = FirebaseDatabase.getInstance().getReference();
+		mStorage = FirebaseStorage.getInstance().getReference();
+		nProg = new ProgressDialog(this);
 
+	}
 
+	@Override
+	protected void onResume() {
+		NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.cancel(MyFirebaseNotification.REVIEW_NOTIFICATION_ID);
+		SharedPreferences sf=getSharedPreferences("store",MODE_PRIVATE);
+		if(sf.contains("storeid+"+storeid))
+			store=new Gson().fromJson(sf.getString("storeid"+storeid,null),new TypeToken<Store>(){}.getType());
+		else    refreshStore();
+		if(sf.contains("imglist"+storeid))
+		{
+			imgList=new Gson().fromJson(sf.getString("imglist"+storeid,null),new TypeToken<ArrayList<String>>(){}.getType());
+			customSwipeAdapter = new CustomSwipeAdapter(context, imgList);
+			viewPager.setAdapter(customSwipeAdapter);
+			customSwipeAdapter.notifyDataSetChanged();
+		}
+		else refreshImageList();
+		if(sf.contains("form"+storeid))
+			feedbackForm=new Gson().fromJson(sf.getString("form"+storeid,null),new TypeToken<FeedbackForm>(){}.getType());
+		else refreshForm();
+		if(sf.contains("review"+storeid))
+			reviewList=new Gson().fromJson(sf.getString("review"+storeid,null),new TypeToken<ArrayList<Review>>() {}.getType());
+		else refreshReviewList();
+		super.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		SharedPreferences.Editor edit=getSharedPreferences("store",MODE_PRIVATE).edit();
+		if(store!=null)
+			edit.putString("storeid"+storeid,new Gson().toJson(store));
+		if(imgList!=null&&imgList.size()>0)
+			edit.putString("imglist"+storeid,new Gson().toJson(imgList));
+		if(reviewList!=null&&reviewList.size()>0)
+			edit.putString("review"+storeid,new Gson().toJson(reviewList));
+		if(feedbackForm!=null)
+			edit.putString("form"+storeid,new Gson().toJson(feedbackForm));
+		super.onPause();
+	}
+
+	public  void refreshAll()
+	{
+		refreshStore();
+		refreshImageList();
+		refreshForm();
+		refreshReviewList();
+	}
+	public void refreshForm()
+	{
+		Intent intent=new Intent(StoreActivity.this,FormIntentService.class);
+		intent.putExtra(FormIntentService.GET_FORM,storeid);
+		intent.setAction(FormIntentService.GET_FORM);
+		intent.putExtra("activity",TAG);
+		startService(intent);
+		LocalBroadcastManager.getInstance(this).registerReceiver(
+				new BroadcastReceiver() {
+					@Override
+					public void onReceive(Context context, Intent intent) {
+						feedbackForm=new Gson().fromJson(intent.getStringExtra(FormIntentService.GET_FORM), new TypeToken<FeedbackForm>() {}.getType());
+						Log.e(TAG, "onReceive: "+new Gson().toJson(feedbackForm) );
+					}
+				}, new IntentFilter(FormIntentService.GET_FORM)
+		);
+	}
+	public void refreshImageList()
+	{
+		DatabaseReference df;
 		df = FirebaseDatabase.getInstance().getReference("StoreImages/" + storeid);
 		df.addListenerForSingleValueEvent(new ValueEventListener() {
 			@Override
 			public void onDataChange(DataSnapshot dataSnapshot) {
-				ArrayList<String> Userlist = new ArrayList<>();
+				imgList = new ArrayList<>();
 				for (DataSnapshot dsp : dataSnapshot.getChildren())
-					Userlist.add(String.valueOf(dsp.getValue()));
-				customSwipeAdapter = new CustomSwipeAdapter(context, Userlist);
+					imgList.add(String.valueOf(dsp.getValue()));
+				customSwipeAdapter = new CustomSwipeAdapter(context, imgList);
 				viewPager.setAdapter(customSwipeAdapter);
 				customSwipeAdapter.notifyDataSetChanged();
-				Log.e("On Data changed", "onDataChange: " + Userlist.size());
+				Log.e("On Data changed", "onDataChange: " + imgList.size());
 			}
 
 			@Override
@@ -151,7 +224,26 @@ public class StoreActivity extends AppCompatActivity {
 			}
 		});
 
-
+	}
+	public void refreshReviewList()
+	{
+		Intent intent=new Intent(StoreActivity.this,ReviewIntentService.class);
+		intent.putExtra(ReviewIntentService.GET_ALL_REVIEWS,storeid);
+		intent.setAction(ReviewIntentService.GET_ALL_REVIEWS);
+		intent.putExtra("activity",TAG);
+		startService(intent);
+		LocalBroadcastManager.getInstance(this).registerReceiver(
+				new BroadcastReceiver() {
+					@Override
+					public void onReceive(Context context, Intent intent) {
+						reviewList=new Gson().fromJson(intent.getStringExtra(ReviewIntentService.GET_ALL_REVIEWS),new TypeToken<ArrayList<Review>>() {}.getType());
+						updateReviewFields();
+					}
+				}, new IntentFilter(ReviewIntentService.GET_ALL_REVIEWS)
+		);
+	}
+	public void refreshStore()
+	{
 		Intent intent=new Intent(StoreActivity.this,StoreIntentService.class);
 		intent.putExtra(StoreIntentService.GET_STORE,storeid);
 		intent.putExtra("activity",TAG);
@@ -169,41 +261,6 @@ public class StoreActivity extends AppCompatActivity {
 		);
 		Log.e(TAG, "onCreate: 123456789 "+storeid);
 
-
-		intent=new Intent(StoreActivity.this,ReviewIntentService.class);
-		intent.putExtra(ReviewIntentService.GET_ALL_REVIEWS,storeid);
-		intent.setAction(ReviewIntentService.GET_ALL_REVIEWS);
-		intent.putExtra("activity",TAG);
-		startService(intent);
-		LocalBroadcastManager.getInstance(this).registerReceiver(
-				new BroadcastReceiver() {
-					@Override
-					public void onReceive(Context context, Intent intent) {
-						reviewList=new Gson().fromJson(intent.getStringExtra(ReviewIntentService.GET_ALL_REVIEWS),new TypeToken<ArrayList<Review>>() {}.getType());
-						updateReviewFields();
-					}
-				}, new IntentFilter(ReviewIntentService.GET_ALL_REVIEWS)
-		);
-		intent=new Intent(StoreActivity.this,FormIntentService.class);
-		intent.putExtra(FormIntentService.GET_FORM,storeid);
-		intent.setAction(FormIntentService.GET_FORM);
-		intent.putExtra("activity",TAG);
-		startService(intent);
-		LocalBroadcastManager.getInstance(this).registerReceiver(
-				new BroadcastReceiver() {
-					@Override
-					public void onReceive(Context context, Intent intent) {
-						feedbackForm=new Gson().fromJson(intent.getStringExtra(FormIntentService.GET_FORM), new TypeToken<FeedbackForm>() {}.getType());
-						Log.e(TAG, "onReceive: "+new Gson().toJson(feedbackForm) );
-					}
-				}, new IntentFilter(FormIntentService.GET_FORM)
-		);
-
-		mdatabse = FirebaseDatabase.getInstance().getReference();
-		mStorage = FirebaseStorage.getInstance().getReference();
-		nProg = new ProgressDialog(this);
-		NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.cancel(MyFirebaseNotification.REVIEW_NOTIFICATION_ID);
 	}
 	@Override
 	protected void onNewIntent(Intent intent) {
@@ -230,6 +287,8 @@ public class StoreActivity extends AppCompatActivity {
 		}
 		switch (item.getItemId())
 		{
+			case R.id.action_refresh:
+				refreshAll();
 			case android.R.id.home:
 				finish();
 				break;
@@ -345,7 +404,7 @@ public class StoreActivity extends AppCompatActivity {
 	}
 
 	public void rateMe(View view) {
-		Toast.makeText(context, "rateMe", Toast.LENGTH_SHORT).show();
+		//Toast.makeText(context, "rateMe", Toast.LENGTH_SHORT).show();
 		final Dialog openDialog = new Dialog(context);
 		openDialog.setContentView(R.layout.content_store_add_review);
 		openDialog.setTitle("Custom Dialog Box");
@@ -358,25 +417,28 @@ public class StoreActivity extends AppCompatActivity {
 			}
 		});
 		Button btn_add = (Button) openDialog.findViewById(R.id.btn_add);
-		btn_add.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
+		if(store!=null) {
+			btn_add.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
 
 
-				RatingBar ratingBar = (RatingBar) openDialog.findViewById(R.id.ratingBar);
-				EditText editText_comment = (EditText) openDialog.findViewById(R.id.editText_comment);
-				Review r = new Review();
-				r.setComment(editText_comment.getText().toString());
-				r.setStoreid(store.getId());
-				r.setRating(ratingBar.getRating());
+					RatingBar ratingBar = (RatingBar) openDialog.findViewById(R.id.ratingBar);
+					EditText editText_comment = (EditText) openDialog.findViewById(R.id.editText_comment);
+					Review r = new Review();
+					r.setComment(editText_comment.getText().toString());
+					r.setStoreid(store.getId());
+					r.setRating(ratingBar.getRating());
 
-				r.setUid(Libs.getUser().getUid());
-				addReview(r);
+					r.setUid(Libs.getUser().getUid());
+					addReview(r);
 
-				openDialog.dismiss();
-			}
-		});
-		openDialog.show();
+					openDialog.dismiss();
+				}
+			});
+			openDialog.show();
+		}
+		else Toast.makeText(context, "Network error.", Toast.LENGTH_SHORT).show();
 	}
 	public void onAddReview(View view)
 	{
@@ -468,11 +530,25 @@ public class StoreActivity extends AppCompatActivity {
 	}
 
 	public void getDirections(View view) {
-		Toast.makeText(context, "get directions", Toast.LENGTH_SHORT).show();
-		Intent intent=new Intent(StoreActivity.this,DirectionsActivity.class);
+
+		final Intent intent=new Intent(StoreActivity.this,DirectionsActivity.class);
 		if(store!=null){
-			intent.putExtra("address",store.getAddress()+","+store.getLocation());
-			startActivity(intent);}
+			new Permissive.Request(android.Manifest.permission.ACCESS_FINE_LOCATION,android.Manifest.permission.ACCESS_COARSE_LOCATION)
+					.whenPermissionsGranted(new PermissionsGrantedListener() {
+						@Override
+						public void onPermissionsGranted(String[] permissions) throws SecurityException {
+							intent.putExtra("address",store.getAddress()+","+store.getLocation());
+							startActivity(intent);
+						}
+					})
+					.whenPermissionsRefused(new PermissionsRefusedListener() {
+						@Override
+						public void onPermissionsRefused(String[] permissions) {
+							Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show();
+						}
+					})
+					.execute(this);
+		}
 		else
 		{
 			Toast.makeText(context, "Network Error", Toast.LENGTH_SHORT).show();
@@ -519,36 +595,38 @@ public class StoreActivity extends AppCompatActivity {
 	}
 
 	public void onCallButton(View view) {
-
-		String uri = "tel:" + store.getPhone_no();
-		final Intent intent = new Intent(Intent.ACTION_CALL);
-		intent.setData(Uri.parse(uri));
-		if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-			// TODO: Consider calling
-			//    ActivityCompat#requestPermissions
-			// here to request the missing permissions, and then overriding
-			//   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-			//                                          int[] grantResults)
-			// to handle the case where the user grants the permission. See the documentation
-			// for ActivityCompat#requestPermissions for more details.
-			return;
-		}
-		new AlertDialog.Builder(context)
-				.setTitle("Call "+store.getName())
-				.setMessage("Are you sure you want to call this store?")
-				.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						startActivity(intent);
+		if(store!=null&&store.getPhone_no().length()>7)
+		new Permissive.Request(Manifest.permission.CALL_PHONE)
+				.whenPermissionsGranted(new PermissionsGrantedListener() {
+					@Override
+					public void onPermissionsGranted(String[] permissions) throws SecurityException {
+						String uri = "tel:" + store.getPhone_no();
+						final Intent intent = new Intent(Intent.ACTION_CALL);
+						intent.setData(Uri.parse(uri));
+						new AlertDialog.Builder(context)
+								.setTitle("Call "+store.getName())
+								.setMessage("Are you sure you want to call this store?")
+								.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog, int which) {
+										startActivity(intent);
+									}
+								})
+								.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog, int which) {
+										dialog.dismiss();
+									}
+								})
+								.setIcon(android.R.drawable.ic_dialog_alert)
+								.show();
 					}
 				})
-				.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
+				.whenPermissionsRefused(new PermissionsRefusedListener() {
+					@Override
+					public void onPermissionsRefused(String[] permissions) {
+						Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show();
 					}
 				})
-				.setIcon(android.R.drawable.ic_dialog_alert)
-				.show();
-
+				.execute(this);
 	}
 }
 

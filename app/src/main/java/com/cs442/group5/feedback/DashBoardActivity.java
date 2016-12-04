@@ -308,6 +308,10 @@ public class DashBoardActivity extends AppCompatActivity
 		Intent intent;
 		switch (id)
 		{
+			case  R.id.qr:
+				intent= new Intent(DashBoardActivity.this,QRReader.class);
+				startActivity(intent);
+				break;
 			case R.id.myprofile:
 				intent = new Intent(this, MyProfileActivity.class);
 				//intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

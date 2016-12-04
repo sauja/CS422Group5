@@ -81,6 +81,7 @@ public class UserIntentService extends IntentService {
 				return parameters;
 			}
 		};
+		postRequest.setRetryPolicy(Libs.getTimeoutPolicy(30000));
 		Libs.getQueueInstance().add(postRequest);
 
 	}
