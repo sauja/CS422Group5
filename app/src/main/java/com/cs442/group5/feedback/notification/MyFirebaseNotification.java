@@ -147,7 +147,7 @@ Intent dashboardIntent=new Intent(MyFirebaseNotification.this,DashBoardActivity.
 				.addAction(R.drawable.ic_notification,"Store",contentIntent)
 				.addAction(R.drawable.ic_notification,"My Store",contentIntent2)
 				.setSound(defaultSoundUri)
-				.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
+				.setVibrate(new long[] { 1000, 1000, 1000 })
 				.setContentIntent(dashboardPendingIntent)
 				.build();
 

@@ -67,7 +67,7 @@ public class ReviewIntentService extends IntentService {
 					final String param2 = intent.getStringExtra(EXTRA_PARAM2);
 					handleActionBaz(param1, param2);*/
 					Log.e(TAG, "onHandleIntent: GET_REVIEW_FOR_CHART storeid "+intent.getLongExtra(GET_REVIEW_FOR_CHART,-1) );
-					getReviewRatingCountChart(intent.getLongExtra(GET_REVIEW_FOR_CHART,-1));
+					getReviewRatingCountChart(intent.getStringExtra(GET_REVIEW_FOR_CHART));
 					break;
 				case ADD_REVIEW:
 					Review r=new Gson().fromJson(intent.getStringExtra(ADD_REVIEW),new TypeToken<Review>() {}.getType());
@@ -137,7 +137,7 @@ public class ReviewIntentService extends IntentService {
 		postRequest.setRetryPolicy(Libs.getTimeoutPolicy(30000));
 		Libs.getQueueInstance().add(postRequest);
 	}
-	public void getReviewRatingCountChart(final long storeid) {
+	public void getReviewRatingCountChart(final String storeid) {
 
 		final String url = Libs.getContext().getString(R.string.server_url) + "/review/getReviewRatingCountChart";
 
@@ -158,7 +158,7 @@ public class ReviewIntentService extends IntentService {
 			@Override
 			protected Map<String, String> getParams() throws AuthFailureError {
 				Map<String, String> parameters = new HashMap<String, String>();
-				parameters.put("storeid", String.valueOf(storeid));
+				parameters.put("storeid", storeid);
 				return parameters;
 			}
 		};

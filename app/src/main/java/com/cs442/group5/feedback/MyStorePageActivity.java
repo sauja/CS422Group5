@@ -20,10 +20,8 @@ import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
 import com.cs442.group5.feedback.model.ReviewRatingCountChart;
-import com.cs442.group5.feedback.model.Store;
 import com.cs442.group5.feedback.notification.MyFirebaseNotification;
 import com.cs442.group5.feedback.service.ReviewIntentService;
-import com.cs442.group5.feedback.service.StoreIntentService;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
@@ -43,7 +41,7 @@ public class MyStorePageActivity extends AppCompatActivity {
 	ArrayList<String> BarEntryLabels ;
 	BarDataSet Bardataset ;
 	BarData BARDATA ;
-	long storeid=-1;
+	String storeid;
 	String storename=null;
 	TextView textView_name;
 	int count =0;
@@ -62,43 +60,18 @@ public class MyStorePageActivity extends AppCompatActivity {
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 			getSupportActionBar().setDisplayShowHomeEnabled(true);
 		}
+
 		if(getIntent().getExtras()!=null)
-		{
-
-			String str=getIntent().getExtras().getString("storeid");
-			if(str!=null)
-				storeid = Long.parseLong(getIntent().getExtras().getString("storeid"));
-				storename=getIntent().getExtras().getString("storename");
-			Log.e(TAG, "onCreate: noti storeid  "+storeid +" "+storename);
-		}
-
-		if(storeid==-1)
-		{
-			storeid=(long) getIntent().getExtras().get("storeid");
+			storename = getIntent().getExtras().getString("storename");
+		if(storename==null)
 			storename=getIntent().getExtras().get("storename").toString();
-			textView_name.setText(storename);
-			Log.e(TAG, "onCreate: fromacti storeid  "+storeid +" "+storename);
-		}
-		if(storename==null) {
-			Intent storeIntent = new Intent(MyStorePageActivity.this, StoreIntentService.class);
-			storeIntent.putExtra(StoreIntentService.GET_STORE, String.valueOf(storeid));
-			storeIntent.putExtra("activity", TAG);
-			storeIntent.setAction(StoreIntentService.GET_STORE);
-			startService(storeIntent);
-			LocalBroadcastManager.getInstance(this).registerReceiver(
-					new BroadcastReceiver() {
-						@Override
-						public void onReceive(Context context, Intent intent) {
-							Store store = new Gson().fromJson(intent.getStringExtra(StoreIntentService.GET_STORE), new TypeToken<Store>() {
-							}.getType());
-
-							textView_name.setText(store.getName());
-
-						}
-					}, new IntentFilter(StoreIntentService.GET_STORE)
-			);
-		}
-		Log.e(TAG, "onCreate: "+storeid );
+		Log.e(TAG, "onCreate: ");
+		if(getIntent().getExtras()!=null)
+			storeid = getIntent().getExtras().getString("storeid");
+		if(storeid==null)
+			storeid=getIntent().getExtras().get("storeid").toString();
+		textView_name.setText(storename);
+		Log.e(TAG, "onCreate: After get "+storeid+" "+storename  );
 		Intent intent=new Intent(MyStorePageActivity.this,ReviewIntentService.class);
 		intent.putExtra(ReviewIntentService.GET_REVIEW_FOR_CHART,storeid);
 		intent.setAction(ReviewIntentService.GET_REVIEW_FOR_CHART);

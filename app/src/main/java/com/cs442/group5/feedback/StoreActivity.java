@@ -326,7 +326,7 @@ public class StoreActivity extends AppCompatActivity {
 		bookmark = menu.findItem(R.id.action_bookmark);
 		// Fetch reference to the share action provider
 
-updateFields(store);
+		updateFields(store);
 		return true;
 	}
 
