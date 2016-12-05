@@ -308,6 +308,10 @@ public class DashBoardActivity extends AppCompatActivity
 		Intent intent;
 		switch (id)
 		{
+			case R.id.bookmark:
+				intent= new Intent(DashBoardActivity.this,BookMarkActivity.class);
+				startActivity(intent);
+				break;
 			case  R.id.qr:
 				intent= new Intent(DashBoardActivity.this,QRReader.class);
 				startActivity(intent);

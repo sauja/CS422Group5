@@ -12,6 +12,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.cs442.group5.feedback.BookMarkActivity;
 import com.cs442.group5.feedback.DashBoardActivity;
 import com.cs442.group5.feedback.MyStorePageActivity;
 import com.cs442.group5.feedback.NewStoreActivity;
@@ -106,7 +107,7 @@ public class StoreIntentService extends IntentService {
 		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
 			@Override
 			public void onResponse(String response) {
-				sendStoreBroadcast(response,UPDATE_STORE);
+				sendStoreBroadcast(response,GET_BOOKMARKED_STORES);
 
 			}
 		}, new Response.ErrorListener() {
@@ -219,6 +220,10 @@ public class StoreIntentService extends IntentService {
 		Intent broadcastIntent=null;
 		switch (broadcastClass)
 		{
+			case "BookMarkActivity":
+				broadcastIntent=new Intent(StoreIntentService.this,BookMarkActivity.class);
+				break;
+
 			case "NewStoreActivity":
 				broadcastIntent=new Intent(StoreIntentService.this,NewStoreActivity.class);
 				break;

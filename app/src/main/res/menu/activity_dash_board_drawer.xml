@@ -10,6 +10,7 @@
             android:id="@+id/qr"
             android:icon="@drawable/qrcode_scan"
             android:title="Scan QR"/>
+        <item android:title="Bookmarks" android:id="@+id/bookmark" android:icon="@drawable/bookmark"/>
         <item
             android:id="@+id/my_stores"
             android:icon="@drawable/domain"

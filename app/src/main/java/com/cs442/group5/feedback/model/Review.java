@@ -7,7 +7,7 @@ package com.cs442.group5.feedback.model;
 
 		import java.sql.Timestamp;
 
-public class Review {
+public class Review implements Comparable<Review>{
 	int id;
 	long storeid;
 	String uid;
@@ -78,5 +78,10 @@ public class Review {
 				"comment "+comment+"\n"+
 				"rating "+rating+"\n"+
 				"date "+timestamp;
+	}
+
+	@Override
+	public int compareTo(Review review) {
+		return review.getId()-this.id ;
 	}
 }

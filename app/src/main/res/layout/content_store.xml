@@ -97,6 +97,11 @@
         <include layout="@layout/content_store_address"/>
 
     </android.support.v7.widget.CardView>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:id="@+id/ll_review">
+    </LinearLayout>
 
 
 </LinearLayout>

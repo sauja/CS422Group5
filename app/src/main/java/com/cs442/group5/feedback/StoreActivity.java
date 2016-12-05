@@ -84,6 +84,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -142,14 +143,21 @@ public class StoreActivity extends AppCompatActivity {
 
 	@Override
 	protected void onResume() {
+		Log.e(TAG, "onResume: "+storeid );
 		NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.cancel(MyFirebaseNotification.REVIEW_NOTIFICATION_ID);
 		SharedPreferences sf=getSharedPreferences("store",MODE_PRIVATE);
-		if(sf.contains("storeid+"+storeid))
-			store=new Gson().fromJson(sf.getString("storeid"+storeid,null),new TypeToken<Store>(){}.getType());
+		if(sf.contains("storeData"+storeid))
+		{
+			Log.e(TAG, "onResume: Restore Store" );
+			store=new Gson().fromJson(sf.getString("storeData"+storeid,null),new TypeToken<Store>(){}.getType());
+
+			updateFields(store);
+		}
 		else    refreshStore();
 		if(sf.contains("imglist"+storeid))
 		{
+			Log.e(TAG, "onResume: Restore Imagelist" );
 			imgList=new Gson().fromJson(sf.getString("imglist"+storeid,null),new TypeToken<ArrayList<String>>(){}.getType());
 			customSwipeAdapter = new CustomSwipeAdapter(context, imgList);
 			viewPager.setAdapter(customSwipeAdapter);
@@ -160,7 +168,11 @@ public class StoreActivity extends AppCompatActivity {
 			feedbackForm=new Gson().fromJson(sf.getString("form"+storeid,null),new TypeToken<FeedbackForm>(){}.getType());
 		else refreshForm();
 		if(sf.contains("review"+storeid))
+		{
+			//Log.e(TAG, "onResume: Restore Review list "+store.getName() );
 			reviewList=new Gson().fromJson(sf.getString("review"+storeid,null),new TypeToken<ArrayList<Review>>() {}.getType());
+			updateReviewFields();
+		}
 		else refreshReviewList();
 		super.onResume();
 	}
@@ -169,13 +181,14 @@ public class StoreActivity extends AppCompatActivity {
 	protected void onPause() {
 		SharedPreferences.Editor edit=getSharedPreferences("store",MODE_PRIVATE).edit();
 		if(store!=null)
-			edit.putString("storeid"+storeid,new Gson().toJson(store));
+			edit.putString("storeData"+storeid,new Gson().toJson(store));
 		if(imgList!=null&&imgList.size()>0)
 			edit.putString("imglist"+storeid,new Gson().toJson(imgList));
 		if(reviewList!=null&&reviewList.size()>0)
 			edit.putString("review"+storeid,new Gson().toJson(reviewList));
 		if(feedbackForm!=null)
 			edit.putString("form"+storeid,new Gson().toJson(feedbackForm));
+		edit.commit();
 		super.onPause();
 	}
 
@@ -282,13 +295,13 @@ public class StoreActivity extends AppCompatActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// handle arrow click here
-		if (item.getItemId() == android.R.id.home) {
-			finish(); // close this activity and return to preview activity (if there is any)
-		}
+
 		switch (item.getItemId())
 		{
 			case R.id.action_refresh:
+				Log.e(TAG, "onOptionsItemSelected: Refresh" );
 				refreshAll();
+				break;
 			case android.R.id.home:
 				finish();
 				break;
@@ -359,48 +372,53 @@ public class StoreActivity extends AppCompatActivity {
 	}
 	private void updateReviewFields() {
 		Log.e(TAG, "updateReviewFields: " );
-		int j = 2;
-		LinearLayout item = (LinearLayout) findViewById(R.id.ll_store);
-		if (reviewList.size() < 2)
-			j = reviewList.size();
-		for (int i = 0; i < j; i++) {
-			Review r = reviewList.get(i);
-			CardView child = (CardView) getLayoutInflater().inflate(R.layout.content_store_review, null);
-			TextView textView_name = (TextView) child.findViewById(R.id.textView_name);
-			TextView textView_date = (TextView) child.findViewById(R.id.textView_date);
-			TextView textView_rating = (TextView) child.findViewById(R.id.textView_rating);
-			TextView textView_comment = (TextView) child.findViewById(R.id.textView_comment);
-			CircleImageView profile_image = (CircleImageView) child.findViewById(R.id.profile_image);
-			textView_name.setText(r.getFullname());
-			textView_date.setText(new SimpleDateFormat("MMM dd, yyyy").format(r.getTimestamp()));
-			textView_rating.setText((String.valueOf(r.getRating())).substring(0, 3));
-			int color = RatingColor.getRatingColor(r.getRating(), context);
-			((GradientDrawable) textView_rating.getBackground()).setStroke(10, color);
-			((GradientDrawable) textView_rating.getBackground()).setColor(color);
-			textView_comment.setText(r.getComment());
-			Glide.with(Libs.getContext()).load(r.getImgurl()).into(profile_image);
+		//if(store!=null) {
+			int j = 2;
+			LinearLayout item = (LinearLayout) findViewById(R.id.ll_review);
+			item.removeAllViews();
+			Collections.sort(reviewList);
+			if (reviewList.size() < 2)
+				j = reviewList.size();
+			for (int i = 0; i < j; i++) {
+				Review r = reviewList.get(i);
+				CardView child = (CardView) getLayoutInflater().inflate(R.layout.content_store_review, null);
+				TextView textView_name = (TextView) child.findViewById(R.id.textView_name);
+				TextView textView_date = (TextView) child.findViewById(R.id.textView_date);
+				TextView textView_rating = (TextView) child.findViewById(R.id.textView_rating);
+				TextView textView_comment = (TextView) child.findViewById(R.id.textView_comment);
+				CircleImageView profile_image = (CircleImageView) child.findViewById(R.id.profile_image);
+				textView_name.setText(r.getFullname());
+				textView_date.setText(new SimpleDateFormat("MMM dd, yyyy").format(r.getTimestamp()));
+				textView_rating.setText((String.valueOf(r.getRating())).substring(0, 3));
+				int color = RatingColor.getRatingColor(r.getRating(), context);
+				((GradientDrawable) textView_rating.getBackground()).setStroke(10, color);
+				((GradientDrawable) textView_rating.getBackground()).setColor(color);
+				textView_comment.setText(r.getComment());
+				Glide.with(Libs.getContext()).load(r.getImgurl()).into(profile_image);
 
-			item.addView(child);
-		}
-		if (reviewList.size() > 2) {
-			Button button = new Button(this, null, R.style.BorderlessButton);
-			button.setText("More Reviews");
-			button.setHeight((int) getResources().getDimension(R.dimen.button_height));
-			button.setGravity(Gravity.RIGHT | Gravity.CENTER);
-			item.addView(button);
-			button.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View view) {
-					Intent intent = new Intent(StoreActivity.this, MoreReviewsActivity.class);
-					intent.putExtra("reviewList", new Gson().toJson(reviewList));
-					intent.putExtra("storeid", store.getId());
-					startActivity(intent);
-					Toast.makeText(context, "More Reviews", Toast.LENGTH_SHORT).show();
-				}
-			});
-		}
+				item.addView(child);
+			}
+			if (reviewList.size() > 2) {
+				Button button = new Button(this, null, R.style.BorderlessButton);
+				button.setText("More Reviews");
+				button.setHeight((int) getResources().getDimension(R.dimen.button_height));
+				button.setGravity(Gravity.RIGHT | Gravity.CENTER);
+				item.addView(button);
+				button.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						Intent intent = new Intent(StoreActivity.this, MoreReviewsActivity.class);
+						intent.putExtra("reviewList", new Gson().toJson(reviewList));
+						intent.putExtra("storeid", storeid);
+						startActivity(intent);
+						Toast.makeText(context, "More Reviews", Toast.LENGTH_SHORT).show();
+					}
+				});
+			}
 
-
+		//}
+		//else
+		//	Toast.makeText(context, "Network Error", Toast.LENGTH_SHORT).show();
 	}
 
 	public void rateMe(View view) {
@@ -464,6 +482,7 @@ public class StoreActivity extends AppCompatActivity {
 			public void onResponse(String response) {
 				Toast.makeText(context, "Added", Toast.LENGTH_SHORT).show();
 				Log.e(TAG, "onResponse: " + response);
+				refreshReviewList();
 			}
 		}, new Response.ErrorListener() {
 			@Override
@@ -532,7 +551,8 @@ public class StoreActivity extends AppCompatActivity {
 	public void getDirections(View view) {
 
 		final Intent intent=new Intent(StoreActivity.this,DirectionsActivity.class);
-		if(store!=null){
+
+		if(store!=null&&Libs.haveNetworkConnection()){
 			new Permissive.Request(android.Manifest.permission.ACCESS_FINE_LOCATION,android.Manifest.permission.ACCESS_COARSE_LOCATION)
 					.whenPermissionsGranted(new PermissionsGrantedListener() {
 						@Override

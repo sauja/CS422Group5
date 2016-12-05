@@ -93,7 +93,7 @@ public class DirectionsActivity extends AppCompatActivity implements OnMapReadyC
 		}
 		if(list==null||list.size()==0)
 		{
-			Toast.makeText(this, "Incorrect Location", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Incorrect Location/ Network Error", Toast.LENGTH_SHORT).show();
 			finish();
 			return;
 		}

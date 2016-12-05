@@ -71,7 +71,7 @@ public class ReviewIntentService extends IntentService {
 					break;
 				case ADD_REVIEW:
 					Review r=new Gson().fromJson(intent.getStringExtra(ADD_REVIEW),new TypeToken<Review>() {}.getType());
-
+					Log.e(TAG, "onHandleIntent: "+new Gson().toJson(r) );
 					addReview(r);
 					break;
 			}
@@ -92,7 +92,7 @@ public class ReviewIntentService extends IntentService {
 		}, new Response.ErrorListener() {
 			@Override
 			public void onErrorResponse(VolleyError error) {
-
+				Toast.makeText(context, "Network Error", Toast.LENGTH_SHORT).show();
 				Log.e("error", error.toString());
 			}
 		}) {

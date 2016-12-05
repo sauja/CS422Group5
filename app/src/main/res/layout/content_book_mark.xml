@@ -14,9 +14,8 @@
     tools:context="com.cs442.group5.feedback.BookMarkActivity"
     tools:showIn="@layout/activity_book_mark">
 
-    <android.support.v7.widget.RecyclerView
+    <ListView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentStart="true" android:layout_alignParentTop="true"
-        tools:listitem="@layout/bookmark_list_item" android:id="@+id/recyclerView_bookmarks"/>
+        android:layout_height="match_parent" android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" android:id="@+id/recyclerView_bookmarks"/>
 </RelativeLayout>

@@ -1,5 +1,6 @@
 package com.cs442.group5.feedback;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -18,6 +20,7 @@ import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cs442.group5.feedback.model.Review;
 import com.cs442.group5.feedback.model.question.FeedbackForm;
@@ -32,11 +35,13 @@ public class AddReviewActivity extends AppCompatActivity {
 	String storeid;
 	FeedbackForm feedbackForm;
 	LinearLayout layout;
+	Review r;
+	boolean isFormCompleted=false;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_review);
-context=this;
+		context=this;
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		toolbar.setTitle("Add Review");
 		setSupportActionBar(toolbar);
@@ -127,24 +132,68 @@ context=this;
 			}
 			i++;
 		}
-		Review r=new Review();
+		r=new Review();
 		r.setUid(Libs.getUser().getUid());
 		r.setComment(reviewString);
 
-		Log.e(TAG, "onSave: "+reviewString );
-		Intent intent=new Intent(AddReviewActivity.this,ReviewIntentService.class);
-		intent.putExtra(ReviewIntentService.ADD_REVIEW,new Gson().toJson(r));
-		intent.putExtra("activity",TAG);
-		intent.setAction(ReviewIntentService.ADD_REVIEW);
-		startService(intent);
-		LocalBroadcastManager.getInstance(this).registerReceiver(
-				new BroadcastReceiver() {
-					@Override
-					public void onReceive(Context context, Intent intent) {
 
-					}
-				}, new IntentFilter(ReviewIntentService.ADD_REVIEW)
-		);
+		Log.e(TAG, "onSave: "+reviewString );
+
+		r.setStoreid(Integer.parseInt(storeid));
+		Log.e(TAG, "onSave: store id "+r.getId() );
+rateMe();
+	}
+	public void rateMe() {
+		//Toast.makeText(context, "rateMe", Toast.LENGTH_SHORT).show();
+		final Dialog openDialog = new Dialog(context);
+		openDialog.setContentView(R.layout.content_store_add_review);
+		openDialog.setTitle("Custom Dialog Box");
+
+		Button btn_close = (Button) openDialog.findViewById(R.id.btn_close);
+		btn_close.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				openDialog.cancel();
+			}
+		});
+		Button btn_add = (Button) openDialog.findViewById(R.id.btn_add);
+		if(storeid!=null) {
+			btn_add.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+
+
+					RatingBar ratingBar = (RatingBar) openDialog.findViewById(R.id.ratingBar);
+					EditText editText_comment = (EditText) openDialog.findViewById(R.id.editText_comment);
+
+					r.setComment(r.getComment()+"\n\n"+editText_comment.getText().toString());
+
+					r.setRating(ratingBar.getRating());
+
+					r.setUid(Libs.getUser().getUid());
+
+					Intent intent=new Intent(AddReviewActivity.this,ReviewIntentService.class);
+					intent.putExtra(ReviewIntentService.ADD_REVIEW,new Gson().toJson(r));
+					intent.putExtra("activity",TAG);
+					intent.setAction(ReviewIntentService.ADD_REVIEW);
+					startService(intent);
+					LocalBroadcastManager.getInstance(context).registerReceiver(
+							new BroadcastReceiver() {
+								@Override
+								public void onReceive(Context context, Intent intent) {
+if(intent.getExtras().get(ReviewIntentService.ADD_REVIEW).toString().contains("true"))
+	finish();
+									else
+	Toast.makeText(context, "Network Error", Toast.LENGTH_SHORT).show();
+								}
+							}, new IntentFilter(ReviewIntentService.ADD_REVIEW)
+					);
+					openDialog.dismiss();
+				}
+			});
+			openDialog.show();
+		}
+		else Toast.makeText(context, "Network error.", Toast.LENGTH_SHORT).show();
 	}
 
 }
