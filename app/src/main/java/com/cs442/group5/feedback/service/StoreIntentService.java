@@ -39,6 +39,7 @@ public class StoreIntentService extends IntentService {
 	public static final String UPDATE_STORE = "updateStore";
 	public static final String GET_ALL_STORES = "getAllStores";
 	public static final String GET_BOOKMARKED_STORES = "getBookmarkedStores";
+	public static final String TOGGLE_BOOKMARK="toggleBookmark";
 	public StoreIntentService(String name) {
 		super(name);
 	}
@@ -61,6 +62,10 @@ public class StoreIntentService extends IntentService {
 				case GET_STORE:
 					Log.e(TAG, "onHandleIntent: GET_STORE:" +intent.getStringExtra(GET_STORE));
 					getStore(intent.getStringExtra(GET_STORE));
+					break;
+				case TOGGLE_BOOKMARK:
+					Log.e(TAG, "onHandleIntent: TOGGLE_BOOKMARK:" +intent.getStringExtra(TOGGLE_BOOKMARK));
+					toggleBookmark(intent.getStringExtra(TOGGLE_BOOKMARK));
 					break;
 				case UPDATE_STORE:
 					Log.e(TAG, "onHandleIntent: UPDATE_STORE:" +intent.getStringExtra(UPDATE_STORE));
@@ -113,7 +118,7 @@ public class StoreIntentService extends IntentService {
 		}, new Response.ErrorListener() {
 			@Override
 			public void onErrorResponse(VolleyError error) {
-
+				Toast.makeText(context, "Network Error", Toast.LENGTH_SHORT).show();
 				Log.e("error", error.toString());
 			}
 		}) {
@@ -155,6 +160,34 @@ public class StoreIntentService extends IntentService {
 		Libs.getQueueInstance().add(postRequest);
 	}
 
+	public void toggleBookmark(final String storeid) {
+		final String url = context.getString(R.string.server_url) + "/store/toggleBookmark";
+
+		StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+			@Override
+			public void onResponse(String response) {
+				sendStoreBroadcast(response,TOGGLE_BOOKMARK);
+				Log.e(TAG, "onResponse: "+response );
+			}
+		}, new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+
+				Log.e("error", error.toString());
+			}
+		}) {
+			@Override
+			protected Map<String, String> getParams() throws AuthFailureError {
+				Map<String, String> parameters = new HashMap<String, String>();
+				parameters.put("storeid", storeid);
+				parameters.put("uid", Libs.getUser().getUid());
+				return parameters;
+			}
+		};
+		postRequest.setRetryPolicy(Libs.getTimeoutPolicy(30000));
+		Libs.getQueueInstance().add(postRequest);
+	}
+
 	public void getStore(final String id) {
 		final String url = context.getString(R.string.server_url) + "/store/getStore";
 
@@ -175,6 +208,7 @@ public class StoreIntentService extends IntentService {
 			protected Map<String, String> getParams() throws AuthFailureError {
 				Map<String, String> parameters = new HashMap<String, String>();
 				parameters.put("id", id);
+				parameters.put("uid",Libs.getUser().getUid());
 				return parameters;
 			}
 		};
@@ -223,7 +257,6 @@ public class StoreIntentService extends IntentService {
 			case "BookMarkActivity":
 				broadcastIntent=new Intent(StoreIntentService.this,BookMarkActivity.class);
 				break;
-
 			case "NewStoreActivity":
 				broadcastIntent=new Intent(StoreIntentService.this,NewStoreActivity.class);
 				break;

@@ -40,6 +40,10 @@ public class TermsNConditions extends AppCompatActivity
 					toolbar.setTitle("About Us");
 					value = "aboutUs.html";
 					break;
+				case "license":
+					toolbar.setTitle("3rd Party License");
+					value = "license.html";
+					break;
 			}
 
 			wv.loadUrl("file:///android_asset/" + value);

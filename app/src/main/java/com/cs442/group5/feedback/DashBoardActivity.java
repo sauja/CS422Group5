@@ -288,6 +288,12 @@ public class DashBoardActivity extends AppCompatActivity
 		{
 			return true;
 		}
+		if(id==R.id.action_bookmark)
+		{
+			Intent intent=new Intent(DashBoardActivity.this,BookMarkActivity.class);
+			startActivity(intent);
+			return true;
+		}
 		if (id == R.id.action_refresh)
 		{
 			Log.e(TAG, "onOptionsItemSelected: Refresh");
@@ -350,6 +356,11 @@ public class DashBoardActivity extends AppCompatActivity
 			case R.id.aboutUs:
 				intent = new Intent(this, TermsNConditions.class);
 				intent.putExtra("webviewName", "AboutUs");
+				startActivity(intent);
+				break;
+			case R.id.license:
+				intent = new Intent(this, TermsNConditions.class);
+				intent.putExtra("webviewName", "license");
 				startActivity(intent);
 				break;
 		}

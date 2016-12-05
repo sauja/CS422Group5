@@ -115,7 +115,7 @@ public class MyProfileActivity extends AppCompatActivity {
 									return;
 								}
 								if (Libs.getUser().getUserType() == Const.USER_EMAIL)
-									name.setText(user.getfName() + user.getlName());
+									name.setText(user.getfName() +" " + user.getlName());
 								else
 									name.setText(Libs.getUser().getDisplayName());
 								email.setText(user.getEmail());

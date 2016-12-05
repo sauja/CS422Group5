@@ -26,6 +26,11 @@
             android:title="Log Out"/>
         </group>
     <group android:checkableBehavior="single">
+        license
+        <item
+            android:id="@+id/license"
+            android:icon="@drawable/information_outline"
+            android:title="3rd Party License"/>
         <item
             android:id="@+id/TandC"
             android:icon="@drawable/information_outline"

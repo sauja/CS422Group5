@@ -19,6 +19,15 @@ public class Store {
 	String ownerID;
 	String tags;
 	float rating;
+	String isBookmarked;
+
+	public String getIsBookmarked() {
+		return isBookmarked;
+	}
+
+	public void setIsBookmarked(String isBookmarked) {
+		this.isBookmarked = isBookmarked;
+	}
 
 	public String getTags() {
 		return tags;

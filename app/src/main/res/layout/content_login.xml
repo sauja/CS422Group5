@@ -94,7 +94,8 @@
                     android:id="@+id/textView_resetPassword"
                     android:gravity="center_horizontal"
                     android:onClick="onResetPassword"
-                    android:textColor="@color/colorPrimaryDark"/>
+                    android:textColor="@color/colorPrimaryDark" android:paddingTop="16dp"
+                    android:paddingBottom="16dp"/>
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

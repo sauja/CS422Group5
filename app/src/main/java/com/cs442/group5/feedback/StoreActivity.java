@@ -20,7 +20,6 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -99,6 +98,7 @@ public class StoreActivity extends AppCompatActivity {
 	static String string_download_url;
 	private StorageReference mStorage;
 	private DatabaseReference mdatabse;
+	MenuItem bookmark;
 	ProgressDialog nProg;
 	RequestQueue queue;
 	Store store;
@@ -138,7 +138,7 @@ public class StoreActivity extends AppCompatActivity {
 		mdatabse = FirebaseDatabase.getInstance().getReference();
 		mStorage = FirebaseStorage.getInstance().getReference();
 		nProg = new ProgressDialog(this);
-
+		addAllBroadcastListners();
 	}
 
 	@Override
@@ -206,15 +206,7 @@ public class StoreActivity extends AppCompatActivity {
 		intent.setAction(FormIntentService.GET_FORM);
 		intent.putExtra("activity",TAG);
 		startService(intent);
-		LocalBroadcastManager.getInstance(this).registerReceiver(
-				new BroadcastReceiver() {
-					@Override
-					public void onReceive(Context context, Intent intent) {
-						feedbackForm=new Gson().fromJson(intent.getStringExtra(FormIntentService.GET_FORM), new TypeToken<FeedbackForm>() {}.getType());
-						Log.e(TAG, "onReceive: "+new Gson().toJson(feedbackForm) );
-					}
-				}, new IntentFilter(FormIntentService.GET_FORM)
-		);
+
 	}
 	public void refreshImageList()
 	{
@@ -245,6 +237,33 @@ public class StoreActivity extends AppCompatActivity {
 		intent.setAction(ReviewIntentService.GET_ALL_REVIEWS);
 		intent.putExtra("activity",TAG);
 		startService(intent);
+
+	}
+	public void addAllBroadcastListners()
+	{
+
+		LocalBroadcastManager.getInstance(this).registerReceiver(
+				new BroadcastReceiver() {
+					@Override
+					public void onReceive(Context context, Intent intent) {
+						store=new Gson().fromJson(intent.getStringExtra(StoreIntentService.GET_STORE),new TypeToken<Store>() {}.getType());
+						Log.e(TAG, "onReceive: "+new Gson().toJson(store) );
+						updateFields(store);
+
+					}
+				}, new IntentFilter(StoreIntentService.GET_STORE)
+		);
+		Log.e(TAG, "onCreate: 123456789 "+storeid);
+		LocalBroadcastManager.getInstance(this).registerReceiver(
+				new BroadcastReceiver() {
+					@Override
+					public void onReceive(Context context, Intent intent) {
+						feedbackForm=new Gson().fromJson(intent.getStringExtra(FormIntentService.GET_FORM), new TypeToken<FeedbackForm>() {}.getType());
+						Log.e(TAG, "onReceive: "+new Gson().toJson(feedbackForm) );
+					}
+				}, new IntentFilter(FormIntentService.GET_FORM)
+		);
+
 		LocalBroadcastManager.getInstance(this).registerReceiver(
 				new BroadcastReceiver() {
 					@Override
@@ -254,6 +273,36 @@ public class StoreActivity extends AppCompatActivity {
 					}
 				}, new IntentFilter(ReviewIntentService.GET_ALL_REVIEWS)
 		);
+
+		LocalBroadcastManager.getInstance(this).registerReceiver(
+				new BroadcastReceiver() {
+					@Override
+					public void onReceive(Context context, Intent intent) {
+						String response=intent.getStringExtra(StoreIntentService.TOGGLE_BOOKMARK);
+						//updateFields(store);
+						if(response!=null)
+						{
+							if(response.contains("booktrue"))
+							{	Toast.makeText(context, "Bookmark added", Toast.LENGTH_SHORT).show();
+								bookmark.setIcon(R.drawable.bookmark_check);}
+							if(response.contains("bookfalse"))
+							{Toast.makeText(context, "Bookmark removed", Toast.LENGTH_SHORT).show();
+								bookmark.setIcon(R.drawable.bookmark);}
+						}
+						Log.e(TAG, "onReceive: TOGGLE_BOOKMARK "+response );
+
+					}
+				}, new IntentFilter(StoreIntentService.TOGGLE_BOOKMARK)
+		);
+	}
+	public void toggleBookmark()
+	{
+		Intent intent=new Intent(StoreActivity.this,StoreIntentService.class);
+		intent.putExtra(StoreIntentService.TOGGLE_BOOKMARK,storeid);
+		intent.putExtra("activity",TAG);
+		intent.setAction(StoreIntentService.TOGGLE_BOOKMARK);
+		startService(intent);
+
 	}
 	public void refreshStore()
 	{
@@ -262,17 +311,7 @@ public class StoreActivity extends AppCompatActivity {
 		intent.putExtra("activity",TAG);
 		intent.setAction(StoreIntentService.GET_STORE);
 		startService(intent);
-		LocalBroadcastManager.getInstance(this).registerReceiver(
-				new BroadcastReceiver() {
-					@Override
-					public void onReceive(Context context, Intent intent) {
-						store=new Gson().fromJson(intent.getStringExtra(StoreIntentService.GET_STORE),new TypeToken<Store>() {}.getType());
-						updateFields(store);
 
-					}
-				}, new IntentFilter(StoreIntentService.GET_STORE)
-		);
-		Log.e(TAG, "onCreate: 123456789 "+storeid);
 
 	}
 	@Override
@@ -284,10 +323,10 @@ public class StoreActivity extends AppCompatActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.menu_store, menu);
-		MenuItem item = menu.findItem(R.id.action_share);
+		bookmark = menu.findItem(R.id.action_bookmark);
 		// Fetch reference to the share action provider
-		miShareAction = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
 
+updateFields(store);
 		return true;
 	}
 
@@ -306,6 +345,8 @@ public class StoreActivity extends AppCompatActivity {
 				finish();
 				break;
 			case R.id.action_bookmark:
+				if(storeid!=null)
+					toggleBookmark();
 				break;
 			case R.id.action_share:
 				if(store!=null){
@@ -373,48 +414,48 @@ public class StoreActivity extends AppCompatActivity {
 	private void updateReviewFields() {
 		Log.e(TAG, "updateReviewFields: " );
 		//if(store!=null) {
-			int j = 2;
-			LinearLayout item = (LinearLayout) findViewById(R.id.ll_review);
-			item.removeAllViews();
-			Collections.sort(reviewList);
-			if (reviewList.size() < 2)
-				j = reviewList.size();
-			for (int i = 0; i < j; i++) {
-				Review r = reviewList.get(i);
-				CardView child = (CardView) getLayoutInflater().inflate(R.layout.content_store_review, null);
-				TextView textView_name = (TextView) child.findViewById(R.id.textView_name);
-				TextView textView_date = (TextView) child.findViewById(R.id.textView_date);
-				TextView textView_rating = (TextView) child.findViewById(R.id.textView_rating);
-				TextView textView_comment = (TextView) child.findViewById(R.id.textView_comment);
-				CircleImageView profile_image = (CircleImageView) child.findViewById(R.id.profile_image);
-				textView_name.setText(r.getFullname());
-				textView_date.setText(new SimpleDateFormat("MMM dd, yyyy").format(r.getTimestamp()));
-				textView_rating.setText((String.valueOf(r.getRating())).substring(0, 3));
-				int color = RatingColor.getRatingColor(r.getRating(), context);
-				((GradientDrawable) textView_rating.getBackground()).setStroke(10, color);
-				((GradientDrawable) textView_rating.getBackground()).setColor(color);
-				textView_comment.setText(r.getComment());
-				Glide.with(Libs.getContext()).load(r.getImgurl()).into(profile_image);
+		int j = 2;
+		LinearLayout item = (LinearLayout) findViewById(R.id.ll_review);
+		item.removeAllViews();
+		Collections.sort(reviewList);
+		if (reviewList.size() < 2)
+			j = reviewList.size();
+		for (int i = 0; i < j; i++) {
+			Review r = reviewList.get(i);
+			CardView child = (CardView) getLayoutInflater().inflate(R.layout.content_store_review, null);
+			TextView textView_name = (TextView) child.findViewById(R.id.textView_name);
+			TextView textView_date = (TextView) child.findViewById(R.id.textView_date);
+			TextView textView_rating = (TextView) child.findViewById(R.id.textView_rating);
+			TextView textView_comment = (TextView) child.findViewById(R.id.textView_comment);
+			CircleImageView profile_image = (CircleImageView) child.findViewById(R.id.profile_image);
+			textView_name.setText(r.getFullname());
+			textView_date.setText(new SimpleDateFormat("MMM dd, yyyy").format(r.getTimestamp()));
+			textView_rating.setText((String.valueOf(r.getRating())).substring(0, 3));
+			int color = RatingColor.getRatingColor(r.getRating(), context);
+			((GradientDrawable) textView_rating.getBackground()).setStroke(10, color);
+			((GradientDrawable) textView_rating.getBackground()).setColor(color);
+			textView_comment.setText(r.getComment());
+			Glide.with(Libs.getContext()).load(r.getImgurl()).into(profile_image);
 
-				item.addView(child);
-			}
-			if (reviewList.size() > 2) {
-				Button button = new Button(this, null, R.style.BorderlessButton);
-				button.setText("More Reviews");
-				button.setHeight((int) getResources().getDimension(R.dimen.button_height));
-				button.setGravity(Gravity.RIGHT | Gravity.CENTER);
-				item.addView(button);
-				button.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View view) {
-						Intent intent = new Intent(StoreActivity.this, MoreReviewsActivity.class);
-						intent.putExtra("reviewList", new Gson().toJson(reviewList));
-						intent.putExtra("storeid", storeid);
-						startActivity(intent);
-						Toast.makeText(context, "More Reviews", Toast.LENGTH_SHORT).show();
-					}
-				});
-			}
+			item.addView(child);
+		}
+		if (reviewList.size() > 2) {
+			Button button = new Button(this, null, R.style.BorderlessButton);
+			button.setText("More Reviews");
+			button.setHeight((int) getResources().getDimension(R.dimen.button_height));
+			button.setGravity(Gravity.RIGHT | Gravity.CENTER);
+			item.addView(button);
+			button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					Intent intent = new Intent(StoreActivity.this, MoreReviewsActivity.class);
+					intent.putExtra("reviewList", new Gson().toJson(reviewList));
+					intent.putExtra("storeid", storeid);
+					startActivity(intent);
+					Toast.makeText(context, "More Reviews", Toast.LENGTH_SHORT).show();
+				}
+			});
+		}
 
 		//}
 		//else
@@ -520,6 +561,16 @@ public class StoreActivity extends AppCompatActivity {
 			TextView textView_Location = (TextView) findViewById(R.id.textView_location);
 			TextView textView_rating = (TextView) findViewById(R.id.textView_rating);
 			this.store = store;
+
+			if(store.getIsBookmarked()!=null&&bookmark!=null)
+			{
+				Log.e(TAG, "updateFields: update Toggle bookmark" );
+				if(store.getIsBookmarked().contains("true"))
+					bookmark.setIcon(R.drawable.bookmark_check);
+				else
+					bookmark.setIcon(R.drawable.bookmark);
+				collapsingToolbar.setTitle(store.getName());
+			}
 			textView_name.setText(store.getName());
 			textView_address.setText(store.getAddress()
 					+ "\n" + store.getLocation()
@@ -616,37 +667,37 @@ public class StoreActivity extends AppCompatActivity {
 
 	public void onCallButton(View view) {
 		if(store!=null&&store.getPhone_no().length()>7)
-		new Permissive.Request(Manifest.permission.CALL_PHONE)
-				.whenPermissionsGranted(new PermissionsGrantedListener() {
-					@Override
-					public void onPermissionsGranted(String[] permissions) throws SecurityException {
-						String uri = "tel:" + store.getPhone_no();
-						final Intent intent = new Intent(Intent.ACTION_CALL);
-						intent.setData(Uri.parse(uri));
-						new AlertDialog.Builder(context)
-								.setTitle("Call "+store.getName())
-								.setMessage("Are you sure you want to call this store?")
-								.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog, int which) {
-										startActivity(intent);
-									}
-								})
-								.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog, int which) {
-										dialog.dismiss();
-									}
-								})
-								.setIcon(android.R.drawable.ic_dialog_alert)
-								.show();
-					}
-				})
-				.whenPermissionsRefused(new PermissionsRefusedListener() {
-					@Override
-					public void onPermissionsRefused(String[] permissions) {
-						Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show();
-					}
-				})
-				.execute(this);
+			new Permissive.Request(Manifest.permission.CALL_PHONE)
+					.whenPermissionsGranted(new PermissionsGrantedListener() {
+						@Override
+						public void onPermissionsGranted(String[] permissions) throws SecurityException {
+							String uri = "tel:" + store.getPhone_no();
+							final Intent intent = new Intent(Intent.ACTION_CALL);
+							intent.setData(Uri.parse(uri));
+							new AlertDialog.Builder(context)
+									.setTitle("Call "+store.getName())
+									.setMessage("Are you sure you want to call this store?")
+									.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+										public void onClick(DialogInterface dialog, int which) {
+											startActivity(intent);
+										}
+									})
+									.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+										public void onClick(DialogInterface dialog, int which) {
+											dialog.dismiss();
+										}
+									})
+									.setIcon(android.R.drawable.ic_dialog_alert)
+									.show();
+						}
+					})
+					.whenPermissionsRefused(new PermissionsRefusedListener() {
+						@Override
+						public void onPermissionsRefused(String[] permissions) {
+							Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show();
+						}
+					})
+					.execute(this);
 	}
 }
 
